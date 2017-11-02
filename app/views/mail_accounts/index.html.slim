@@ -1,0 +1,33 @@
+h1 Listing mail_accounts
+
+table
+  thead
+    tr
+      th Name
+      th Email
+      th User
+      th Login
+      th Port
+      th Ssl
+      th Host
+      th
+      th
+      th
+
+  tbody
+    - @mail_accounts.each do |mail_account|
+      tr
+        td = mail_account.name
+        td = mail_account.email
+        td = mail_account.user
+        td = mail_account.login
+        td = mail_account.port
+        td = mail_account.ssl
+        td = mail_account.host
+        td = link_to 'Show', mail_account
+        td = link_to 'Edit', edit_mail_account_path(mail_account)
+        td = link_to 'Destroy', mail_account, data: { confirm: 'Are you sure?' }, method: :delete
+
+br
+
+= link_to 'New UserMail account', new_mail_account_path

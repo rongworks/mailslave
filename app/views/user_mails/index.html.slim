@@ -1,0 +1,37 @@
+h1 Listing UserMails
+
+table.table.datatable.table-striped.table-bordered
+  thead
+    tr
+      th From
+      th To
+      th Replyto
+      th Receive date
+      th Envelope from
+      th Message
+      th Cc
+      th Bcc
+      th Body
+      th Subject
+      th
+      th
+      th
+
+  tbody
+    - @user_mails.each do |mail|
+      tr
+        td = mail.from
+        td = mail.to
+        td = mail.replyto
+        td = mail.receive_date
+        td = mail.envelope_from
+        td = mail.message_id
+        td = mail.cc
+        td = mail.bcc
+        td = get_content(mail).truncate(150)
+        td = mail.subject
+        td = mail.user_mail_attachments.count
+        td = link_to 'Show', mail
+        td = link_to 'Destroy', mail, data: { confirm: 'Are you sure?' }, method: :delete
+
+br

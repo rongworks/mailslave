@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MailSlave</title>
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.16/b-1.4.2/b-colvis-1.4.2/cr-1.4.1/fh-3.1.3/datatables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.16/b-1.4.2/b-colvis-1.4.2/cr-1.4.1/fh-3.1.3/datatables.min.js"></script>
+
+  </head>
+
+  <body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand float-left" href="/"><%= image_tag("mailslave.png", :alt => "MailSlave logo",size:'100x100',class:'logo-img') %></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <h2>MAILSLAVE</h2>
+    <div class="collapse navbar-collapse align-bottom" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <%= link_to 'Mail Accounts',mail_accounts_path, class:'nav-item nav-link'  %>
+        <%= link_to 'Mails',user_mails_path, class:'nav-item nav-link' %>
+        <% if user_signed_in? %>
+            <%= link_to "Edit profile (#{current_user.email})", edit_user_registration_path, :class => 'nav-item nav-link' %>
+            <%= link_to "Logout", destroy_user_session_path, method: :delete, :class => 'nav-item nav-link'  %>
+        <% else %>
+            <%= link_to "Sign up", new_user_registration_path, :class => 'nav-item nav-link'  %>
+            <%= link_to "Login", new_user_session_path, :class => 'nav-item nav-link'  %>
+        <% end %>
+      </div>
+    </div>
+  </nav>
+
+  <p class="notice"><%= notice %></p>
+  <p class="alert"><%= alert %></p>
+
+  <%= yield %>
+  </body>
+</html>

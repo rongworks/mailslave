@@ -1,0 +1,54 @@
+p#notice = notice
+
+div.card
+  div.card-header
+    h2
+      strong Subject:
+      = @user_mail.subject
+  div.card-body
+    div.card-title.row
+      div.d-flex.flex-column.col-3
+        p
+          strong From:
+          = email_fields @user_mail.from
+        p
+          strong Replyto:
+          =  @user_mail.replyto
+        p
+          strong To:
+          = email_fields @user_mail.to
+        p
+          strong Cc:
+          = email_fields @user_mail.cc
+        p
+          strong Bcc:
+          = email_fields @user_mail.bcc
+      div.d-flex.flex-column.col
+        p
+          strong Receive date:
+          = @user_mail.receive_date
+        p
+          strong Envelope from:
+          = @user_mail.envelope_from
+        p
+          strong Message ID:
+          = @user_mail.message_id
+
+    div.card-text
+      strong Body:
+      nav.nav
+        = link_to "View as HTML",user_mail_path(id: @user_mail, view_as: 'html'), class:'nav-link'
+        = link_to "View as Plain Text",user_mail_path(id: @user_mail, view_as: 'plain'), class:'nav-link'
+        = link_to "View Source",user_mail_path(id: @user_mail, view_as: 'source'), class:'nav-link'
+        = link_to "Download",user_mail_path(id: @user_mail, format: 'eml'), class:'nav-link'
+      hr
+      = show_attachments(@user_mail)
+
+      pre
+        = @body_content
+
+
+  div.card-footer.row.d-print-none
+    = link_to 'Back', user_mails_path, class:"btn btn-primary m-2"
+
+

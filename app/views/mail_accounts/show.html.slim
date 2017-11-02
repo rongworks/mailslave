@@ -1,0 +1,48 @@
+p#notice = notice
+
+p
+  strong Name:
+  = @mail_account.name
+p
+  strong Email:
+  = @mail_account.email
+p
+  strong User:
+  = @mail_account.user
+p
+  strong Login:
+  = @mail_account.login
+p
+  strong Port:
+  = @mail_account.port
+p
+  strong Ssl:
+  = @mail_account.ssl
+p
+  strong Host:
+  = @mail_account.host
+
+h2 Mails (#{@mail_account.user_mails.count})
+= link_to "Fetch user_mails", pull_imap_mail_account_path(id: @mail_account), :method => :post
+
+table.table-striped
+  thead.thead-inverse
+    tr
+      th From
+      th Received
+      th Subject
+      th
+  tbody
+    - @mail_account.user_mails.each do |mail|
+      tr
+        td
+          = mail.from
+        td
+          = mail.receive_date
+        td
+          = mail.subject
+        td
+          = link_to 'Show',user_mail_path(id: mail.id)
+= link_to 'Edit', edit_mail_account_path(@mail_account)
+'  |
+= link_to 'Back', mail_accounts_path

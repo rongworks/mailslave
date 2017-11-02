@@ -1,0 +1,15 @@
+= simple_form_for(@mail_account) do |f|
+  = f.error_notification
+
+  .form-inputs
+    = f.input :name
+    = f.input :email
+    = f.association :user
+    = f.input :login
+    = f.input :password
+    = f.input :port
+    = f.input :ssl
+    = f.input :host
+
+  .form-actions
+    = f.button :submit
