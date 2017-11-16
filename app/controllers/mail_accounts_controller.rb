@@ -16,6 +16,7 @@ class MailAccountsController < ApplicationController
   # GET /mail_accounts/new
   def new
     @mail_account = MailAccount.new
+    authorize @mail_account
   end
 
   # GET /mail_accounts/1/edit

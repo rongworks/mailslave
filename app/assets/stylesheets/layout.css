@@ -3,3 +3,75 @@ logo-img{
     width:100px;
 
 }
+.subject{
+    margin-top:4rem;
+}
+.badge-info {
+    color: #fff;
+    background-color: #17a2b8;
+    margin-right: 0.3em;
+}
+hr {
+    display: block;
+    position: relative;
+    padding: 0;
+    margin: 8px auto;
+    height: 0;
+    width: 100%;
+    max-height: 0;
+    font-size: 1px;
+    line-height: 0;
+    clear: both;
+    border: none;
+    border-top: 1px solid #aaaaaa;
+    border-bottom: 1px solid #ffffff;
+}
+.content {
+    margin-top:2em;
+}
+.chview {
+    margin-top:2em;
+}
+.btn-secondary.active:not([disabled]):not(.disabled), .btn-secondary:active:not([disabled]):not(.disabled), .show > .btn-secondary.dropdown-toggle {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #666e76;
+    box-shadow: none!important;
+}
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid transparent;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    padding: .275rem .5rem;
+    font-size: .8rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+.textarea {
+    margin-top:2em;
+    border: 1px solid #ccc;
+}
+.view {
+    margin-left:-1em;
+}
+.text {
+    margin-bottom:1em;
+}
+
+.fa {
+    margin: 0.2em;
+}

@@ -1,10 +1,13 @@
 class UserMailPolicy < ApplicationPolicy
+  def download_attachment?
+    !user.present?
+  end
   class Scope < Scope
     def resolve
-      if user.admin?
-        scope.all
+      if user && user.admin?
+        scope
       else
-        user.user_mails
+        scope #TODO: Limit to user
       end
     end
   end

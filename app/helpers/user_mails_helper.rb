@@ -15,14 +15,20 @@ module UserMailsHelper
 
   def show_attachments(mail)
     attached_files = mail.user_mail_attachments.map do |att|
-      content_tag :span, class:'badge' do
-        link_to(att.file_identifier,att.file.url)
-      end
+        link_to(att.file_identifier,download_attachment_user_mail_path(filename:att.file_identifier),class:'badge badge-info')
     end.join().html_safe
   end
 
   def get_content(mail)
     content = mail.html_content ? mail.html_content.html_safe : mail.plain_content || ""
     content_tag :span, content if content
+  end
+
+  def display_body(text)
+    if strip_tags(text) != text
+      content_tag(:div,text)
+    else
+      content_tag(:pre,text)
+    end
   end
 end

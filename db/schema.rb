@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171102095926) do
+ActiveRecord::Schema.define(version: 20171108120422) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -41,13 +41,13 @@ ActiveRecord::Schema.define(version: 20171102095926) do
     t.string   "name"
     t.string   "email"
     t.integer  "user_id"
-    t.string   "login"
-    t.string   "password"
     t.string   "port"
     t.boolean  "ssl"
     t.string   "host"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text     "login"
+    t.text     "password"
     t.index ["user_id"], name: "index_mail_accounts_on_user_id"
   end
 
@@ -73,10 +73,10 @@ ActiveRecord::Schema.define(version: 20171102095926) do
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
     t.string   "mailbox_id"
-    t.text     "source_content"
     t.text     "plain_content"
     t.text     "html_content"
-    t.string   "attached_files"
+    t.string   "source_file"
+    t.string   "checksum"
   end
 
   create_table "users", force: :cascade do |t|
@@ -93,6 +93,7 @@ ActiveRecord::Schema.define(version: 20171102095926) do
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
     t.boolean  "admin"
+    t.string   "name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

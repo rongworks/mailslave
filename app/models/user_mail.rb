@@ -4,11 +4,17 @@ class UserMail < ApplicationRecord
 
   validates :mailbox_id, uniqueness: true
 
-  #mount_uploader :source_content, MailSourceUploader
+  mount_uploader :source_file, MailSourceUploader
+
+  ransack_alias :quicksearch, :subject_or_html_content_or_plain_content_or_from_or_to_or_cc_or_bcc
 
   def get_attachment(filename)
     mail = Mail.read_from_string(source_content)
     file = mail.attachments.detect {|att| att.filename == filename}
     return file.decoded
+  end
+
+  def source_content
+    File.read(source_file.file.file)
   end
 end

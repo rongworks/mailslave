@@ -1,37 +1,34 @@
 h1 Listing UserMails
+- content_for :search do
+  div
+    = search_form_for @q do |f|
+      = f.text_field :quicksearch_cont, class: "radius-left expand", placeholder: "Schnellsuche"
+      = f.button fa_icon 'eye', class:'', type:'submit'
 
-table.table.datatable.table-striped.table-bordered
+table.table
   thead
     tr
+      th Subject
       th From
       th To
-      th Replyto
       th Receive date
-      th Envelope from
-      th Message
+      th = fa_icon 'paperclip'
       th Cc
       th Bcc
-      th Body
-      th Subject
-      th
-      th
-      th
+
+
 
   tbody
     - @user_mails.each do |mail|
       tr
-        td = mail.from
-        td = mail.to
-        td = mail.replyto
-        td = mail.receive_date
-        td = mail.envelope_from
-        td = mail.message_id
-        td = mail.cc
-        td = mail.bcc
-        td = get_content(mail).truncate(150)
-        td = mail.subject
+        td
+          = link_to mail.subject, mail, class:''
+        td = email_fields mail.from
+        td = email_fields mail.to
+        td
+          span.badge.badge-light = l mail.receive_date
         td = mail.user_mail_attachments.count
-        td = link_to 'Show', mail
-        td = link_to 'Destroy', mail, data: { confirm: 'Are you sure?' }, method: :delete
+        td = email_fields mail.cc
+        td = email_fields mail.bcc
 
 br

@@ -3,7 +3,7 @@ require 'net/imap'
 
 class MailAccount < ApplicationRecord
 
-  #crypt_keeper :login, :password , :encryptor => :aes_new, :key => 'super_good_password', salt: 'salt'
+  crypt_keeper :login, :password , :encryptor => :aes_new, :key => 'gotMailSlaveToEncrypt', salt: 'salt'
 
   belongs_to :user
   has_many :user_mails
@@ -21,8 +21,6 @@ class MailAccount < ApplicationRecord
       mail_obj = Mail.read_from_string msg
       plain_text = body_in_utf8(mail_obj,'text/plain')
       html_text = body_in_utf8(mail_obj,'text/html')
-      m_source  = mail_obj.to_s
-      m_attached_files = get_attachments(mail_obj).to_s
       m_subject = mail_obj.subject
       m_from = mail_obj.from
       m_to = mail_obj.to
@@ -43,11 +41,15 @@ class MailAccount < ApplicationRecord
                               cc: m_cc,
                               bcc: m_bcc,
                               replyto: m_replyto,
-                              attached_files: m_attached_files,
-                              source_content: m_source
-
                              )
       if mail.save
+        m_file = CarrierFile.new(mail_obj.to_s)
+        m_file.original_filename = "mail_source_#{mail.id}.eml"
+        m_file.content_type = mail_obj.mime_type
+        mail.source_file = m_file
+        mail.checksum = Digest::SHA2.hexdigest(mail_obj.to_s)
+        mail.save!
+
         mail_obj.attachments.each do |att|
           document = CarrierFile.new(att.decoded)
           document.original_filename = att.filename

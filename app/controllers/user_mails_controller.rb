@@ -5,7 +5,8 @@ class UserMailsController < ApplicationController
   # GET /user_mails
   # GET /user_mails.json
   def index
-    @user_mails = policy_scope(UserMail)
+    @q = UserMail.ransack(params[:q])
+    @user_mails = policy_scope(@q.result)
   end
 
   # GET /user_mails/1
@@ -14,14 +15,14 @@ class UserMailsController < ApplicationController
     respond_to do |format|
       format.html do
         html = @user_mail.html_content
-        @body_content = html ? html.html_safe : @user_mail.plain_content || @user_mail.source_content
-        @body_content = html ? html.html_safe : "<strong style='color:red'>No HTML Content<strong>".html_safe if params['view_as'] == 'html'
+        @body_content = html.present? ? html.html_safe : @user_mail.plain_content || @user_mail.source_content
+        @body_content = html.present? ? html.html_safe : "<strong style='color:red'>No HTML Content<strong>".html_safe if params['view_as'] == 'html'
         @body_content = @user_mail.plain_content if params['view_as'] == 'plain'
         @body_content = @user_mail.source_content if params['view_as'] == 'source'
       end
       format.json {}
       format.eml do
-        send_data @user_mail.source_content,filename:"#{@user_mail.subject}.eml"
+        send_file @user_mail.source_file.file.file,filename:"#{@user_mail.subject}.eml"
       end
     end
 

@@ -66,6 +66,12 @@ gem 'delayed_job_active_record'
 gem 'crono'
 gem 'regressor'
 gem 'pundit'
+gem 'font-awesome-rails'
+gem 'sprockets-rails'
+gem 'bootstrap','~> 4.0.0.beta2.1'
+gem 'bootstrap-will_paginate'
+gem 'popper_js'
+gem 'ransack'
 
 group :development, :test do
   gem "database_cleaner"

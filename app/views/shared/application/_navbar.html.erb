@@ -1,0 +1,48 @@
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="/">
+    <%= image_tag asset_path('mailslave.png'),size:'50x50'%>
+    MAILSLAVE
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <% if user_signed_in? %>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <%= t(MailAccount,count: 2) %>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <%= content_tag :div, "No Accounts", class:'alert alert-danger dropdown-item' unless current_user.mail_accounts.count > 0 %>
+              <%  current_user.mail_accounts.each do |macc| %>
+                  <%= link_to macc.login, mail_account_path(macc), class: 'dropdown-item' %>
+              <% end %>
+              <%= link_to 'New Account', new_mail_account_path(user_id: current_user.id), {class: 'dropdown-item'} %>
+            </div>
+      <% end %>
+      </li>
+      <li class="nav-item">
+        <%= link_to 'Mails',user_mails_path, class:'nav-link' %>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Search</a>
+      </li>
+    </ul>
+    <%= yield(:search) %>
+    <div class="dropdown show navbar-text">
+      <a class="dropdown-toggle" href="#" id="ProfileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fa fa-user-circle-o" aria-hidden="true"></i> <%= user_signed_in? ? current_user.email : 'Guest' %>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="ProfileDropdown">
+        <% if user_signed_in? %>
+            <%= link_to "Edit profile", edit_user_registration_path, :class => 'dropdown-item' %>
+            <%= link_to "Logout", destroy_user_session_path, method: :delete, :class => 'dropdown-item'  %>
+        <% else %>
+            <%= link_to "Sign up", new_user_registration_path, :class => 'dropdown-item'  %>
+            <%= link_to "Login", new_user_session_path, :class => 'dropdown-item'  %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>

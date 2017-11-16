@@ -1,27 +1,30 @@
 p#notice = notice
 
-p
-  strong Name:
+h2
+  = fa_icon 'user-circle-o'
   = @mail_account.name
-p
-  strong Email:
-  = @mail_account.email
-p
-  strong User:
-  = @mail_account.user
-p
-  strong Login:
-  = @mail_account.login
-p
-  strong Port:
-  = @mail_account.port
-p
-  strong Ssl:
-  = @mail_account.ssl
-p
-  strong Host:
-  = @mail_account.host
+  span.text-muted.m-4
+    = fa_icon 'envelope-o'
+    = @mail_account.email
 
+
+
+div.row
+  div.col-sm-1
+    strong Login:
+  div.col-sm-4
+    = @mail_account.login
+div.row
+  div.col-sm-1
+    strong Host:
+  div.col-sm-4
+    = "#{@mail_account.host}:#{@mail_account.port}"
+div.row
+  div.col-sm-1
+    strong SSL
+  div.col-sm-4
+    = @mail_account.ssl? ? fa_icon('check') : fa_icon('times')
+hr
 h2 Mails (#{@mail_account.user_mails.count})
 = link_to "Fetch user_mails", pull_imap_mail_account_path(id: @mail_account), :method => :post
 
