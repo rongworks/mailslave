@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171108120422) do
+ActiveRecord::Schema.define(version: 20171116134953) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -77,6 +77,7 @@ ActiveRecord::Schema.define(version: 20171108120422) do
     t.text     "html_content"
     t.string   "source_file"
     t.string   "checksum"
+    t.string   "in_reply_to"
   end
 
   create_table "users", force: :cascade do |t|

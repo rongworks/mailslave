@@ -29,6 +29,7 @@ class MailAccount < ApplicationRecord
       m_replyto = mail_obj.reply_to
       m_receive_date = mail_obj.date
       m_id = mail_obj.message_id
+      m_in_reply_to = mail_obj.in_reply_to
 
       mail = self.user_mails.new(subject: m_subject,
                               from: m_from,
@@ -41,6 +42,7 @@ class MailAccount < ApplicationRecord
                               cc: m_cc,
                               bcc: m_bcc,
                               replyto: m_replyto,
+                              in_reply_to: m_in_reply_to
                              )
       if mail.save
         m_file = CarrierFile.new(mail_obj.to_s)
