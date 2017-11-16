@@ -61,6 +61,7 @@ class MailAccount < ApplicationRecord
       end
     end
     conn.logout
+    conn.disconnect
   end
 
   def get_attachments(message)
