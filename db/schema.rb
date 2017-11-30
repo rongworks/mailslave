@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171116134953) do
+ActiveRecord::Schema.define(version: 20171128114723) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -49,6 +49,17 @@ ActiveRecord::Schema.define(version: 20171116134953) do
     t.text     "login"
     t.text     "password"
     t.index ["user_id"], name: "index_mail_accounts_on_user_id"
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.string   "var",         null: false
+    t.text     "value"
+    t.string   "target_type", null: false
+    t.integer  "target_id",   null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["target_type", "target_id", "var"], name: "index_settings_on_target_type_and_target_id_and_var", unique: true
+    t.index ["target_type", "target_id"], name: "index_settings_on_target_type_and_target_id"
   end
 
   create_table "user_mail_attachments", force: :cascade do |t|

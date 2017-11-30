@@ -72,6 +72,7 @@ gem 'bootstrap','~> 4.0.0.beta2.1'
 gem 'bootstrap-will_paginate'
 gem 'popper_js'
 gem 'ransack'
+gem 'ledermann-rails-settings'
 
 group :development, :test do
   gem "database_cleaner"
