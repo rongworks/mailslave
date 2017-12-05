@@ -2,7 +2,7 @@ class UserMail < ApplicationRecord
   belongs_to :mail_account
   has_many :user_mail_attachments
 
-  validates :mailbox_id, uniqueness: true
+  validates :message_id, uniqueness: true
 
   mount_uploader :source_file, MailSourceUploader
 

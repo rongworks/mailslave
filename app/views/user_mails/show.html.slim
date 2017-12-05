@@ -38,10 +38,14 @@ div.container
       div.col-sm-6
         strong.mr-2 Receive Date:
         = l @user_mail.receive_date
+      div.row
+        strong In Reply To
+        = @user_mail.in_reply_to
     div.row.chview
       div.col
         strong Attachments:
         = show_attachments(@user_mail)
+
   div
     div.row
       div.col.bg-secondary.text-white.content

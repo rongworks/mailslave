@@ -16,7 +16,7 @@ class UserMailsController < ApplicationController
       format.html do
         html = @user_mail.html_content
         @body_content = html.present? ? html.html_safe : @user_mail.plain_content || @user_mail.source_content
-        @body_content = html.present? ? html.html_safe : "<strong style='color:red'>No HTML Content<strong>".html_safe if params['view_as'] == 'html'
+        @body_content = html.present? ? html.html_safe : "<div>#{@user_mail.plain_content}</div>".html_safe if params['view_as'] == 'html'
         @body_content = @user_mail.plain_content if params['view_as'] == 'plain'
         @body_content = @user_mail.source_content if params['view_as'] == 'source'
       end
