@@ -1,3 +1,14 @@
+div.history.float-right
+  strong Related Mails
+  ul.list-group
+    - @prev_mails.each do |rmail|
+      li.list-group-item
+        = link_to "#{rmail.subject}(#{rmail.receive_date})",rmail
+      li.list-group-item.disabled
+        = @user_mail.subject
+    - @next_mails.each do |rmail|
+      li.list-group-item
+        = link_to "#{rmail.subject}(#{rmail.receive_date})", rmail
 div.container
   div.btn-group.d-print-none.float-right
     = link_to 'Back', user_mails_path, class:"btn btn-secondary"
@@ -38,9 +49,6 @@ div.container
       div.col-sm-6
         strong.mr-2 Receive Date:
         = l @user_mail.receive_date
-      div.row
-        strong In Reply To
-        = @user_mail.in_reply_to
     div.row.chview
       div.col
         strong Attachments:

@@ -1,38 +1,30 @@
-require 'mail'
 require 'net/imap'
+require 'mail'
 
-class MailAccount < ApplicationRecord
+class MailSync
+  attr_accessor :account, :imap
 
-  crypt_keeper :login, :password , encryptor: :aes_new, key: 'gotMailSlaveToEncrypt', salt: 'salt'
-
-  belongs_to :user
-  has_many :user_mails
-
-  has_settings do |setting|
-    setting.key :sync_options, defaults: {
-      interval: 100800, # interval for retrieving TODO: implement
-      only_seen: true, # only seen messages get archived
-      only_older_than: 7, # only archive messages older than X days
-      delete_after: 30, # delete messages that are older than x days TODO: implement
-      exclude_folders: '[]' # list of folders, that are not archived TODO: implement
-    }
+  def initialize(account)
+    self.account = account
+    self.imap = Net::IMAP.new(account.host, account.port, account.ssl)
+    self.imap.login(account.login, account.password)
   end
 
-  def pull_imap
-    search_query = ['UNFLAGGED']
-    search_query << 'SEEN' if settings(:sync_options).only_seen
-    search_query << "BEFORE"
-    search_query << (Date.today - settings(:sync_options).only_older_than).strftime('%d-%b-%Y')
+  def sync(folder_excludes, search_query)
+    folder_list = imap.list('','*').collect {|mbox| mbox.name}
+    # TODO: filter folder_list for excluded folders
+    folder_list.each do |folder|
+      Rails.logger.info "searching mailbox #{folder} for account #{account.name}"
+      acc_folder = account.find_or_create_folder(folder)
 
-    mail_sync = MailSync.new(self)
-    mail_sync.sync([], search_query)
-    mail_sync.disconnect
+      import_folder(folder, search_query)
+    end
   end
 
-  def import_folder(imap,folder,search_query)
+  def import_folder(folder,search_query)
     imap.examine(folder)
     imap.search(search_query).each do |message_id|
-      logger.info "Processing #{message_id}"
+      Rails.logger.info "Processing #{message_id}"
 
       # fetch all the email contents
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
@@ -51,11 +43,11 @@ class MailAccount < ApplicationRecord
       m_in_reply_to = mail_obj.in_reply_to
 
       if UserMail.exists?(:message_id => m_id)
-        logger.info "Existing mail #{m_id} skipped"
+        Rails.logger.info "Existing mail #{m_id} skipped"
         next
       end
 
-      mail = self.user_mails.new(subject: m_subject,
+      mail = account.user_mails.new(subject: m_subject,
                                  from: m_from,
                                  to: m_to,
                                  receive_date: m_receive_date,
@@ -89,13 +81,18 @@ class MailAccount < ApplicationRecord
     end
   end
 
+  def disconnect
+    imap.logout
+    imap.disconnect
+  end
+
   def get_attachments(message)
-    return message.attachments.collect {|att| att.filename}
+    return message.attachments.map(&:filename)
   end
 
   def body_in_utf8(message,content_type)
     if message.multipart?
-      body_text = ""
+      body_text = ''
       message.parts.each do |part_to_use|
         if part_to_use.content_type[content_type]
           encoding = part_to_use.content_type_parameters['charset'] if part_to_use.content_type_parameters
