@@ -25,6 +25,30 @@ div.row
   div.col-sm-4
     = @mail_account.ssl? ? fa_icon('check') : fa_icon('times')
 hr
+
+div.row
+  div.col
+    div
+      strong interval
+      = @mail_account.settings(:sync_options).interval
+    div
+      strong only_seen
+      = @mail_account.settings(:sync_options).only_seen ? fa_icon('check') : fa_icon('times')
+    div
+      strong only_older_than
+      = " #{@mail_account.settings(:sync_options).only_older_than} days"
+    div
+      strong delete_after
+      = " #{@mail_account.settings(:sync_options).delete_after} days"
+    div
+      strong exclude_folders
+      = @mail_account.settings(:sync_options).exclude_folders
+  div.col
+    ul.list-group
+      - @mail_account.mailbox_folders.each do |f|
+        li.list-group-item
+          = f.name
+
 h2 Mails (#{@mail_account.user_mails.count})
 = link_to "Fetch user_mails", pull_imap_mail_account_path(id: @mail_account), :method => :post
 

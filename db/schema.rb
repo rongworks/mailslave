@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171128114723) do
+ActiveRecord::Schema.define(version: 20171212144732) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -51,6 +51,15 @@ ActiveRecord::Schema.define(version: 20171128114723) do
     t.index ["user_id"], name: "index_mail_accounts_on_user_id"
   end
 
+  create_table "mailbox_folders", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "mail_account_id"
+    t.boolean  "sync_active"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+    t.index ["mail_account_id"], name: "index_mailbox_folders_on_mail_account_id"
+  end
+
   create_table "settings", force: :cascade do |t|
     t.string   "var",         null: false
     t.text     "value"
@@ -74,7 +83,7 @@ ActiveRecord::Schema.define(version: 20171128114723) do
     t.string   "from"
     t.string   "to"
     t.string   "replyto"
-    t.date     "receive_date"
+    t.datetime "receive_date"
     t.string   "envelope_from"
     t.string   "message_id"
     t.string   "cc"
@@ -89,6 +98,8 @@ ActiveRecord::Schema.define(version: 20171128114723) do
     t.string   "source_file"
     t.string   "checksum"
     t.string   "in_reply_to"
+    t.integer  "folder_id"
+    t.text     "conversation"
   end
 
   create_table "users", force: :cascade do |t|

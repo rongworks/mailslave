@@ -25,7 +25,7 @@ module UserMailsHelper
   end
 
   def display_body(text)
-    if strip_tags(text) != text
+    if text.include?('<html>') && params[:view_as] != 'source'
       content_tag(:div,text)
     else
       content_tag(:pre,text)

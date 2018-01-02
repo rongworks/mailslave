@@ -1,3 +1,14 @@
+div.history.float-right
+  strong Related Mails
+  ul.list-group
+    - @prev_mails.each do |rmail|
+      li.list-group-item
+        = link_to "#{rmail.subject}(#{rmail.receive_date})",rmail
+    li.list-group-item.disabled
+      = @user_mail.subject
+    - @next_mails.each do |rmail|
+      li.list-group-item
+        = link_to "#{rmail.subject}(#{rmail.receive_date})", rmail
 div.container
   div.btn-group.d-print-none.float-right
     = link_to 'Back', user_mails_path, class:"btn btn-secondary"
@@ -42,12 +53,13 @@ div.container
       div.col
         strong Attachments:
         = show_attachments(@user_mail)
+
   div
     div.row
       div.col.bg-secondary.text-white.content
         span.h4 = @user_mail.subject
         div.btn-group.view.float-right
-          = link_to "View as HTML",user_mail_path(id: @user_mail, view_as: 'html'), class: 'btn btn-secondary'
+          = link_to "View as HTML",user_mail_path(id: @user_mail, view_as: 'html'), class: 'btn btn-secondary' if @user_mail.has_html?
           = link_to "View as Plain Text",user_mail_path(id: @user_mail, view_as: 'plain'), class: 'btn btn-secondary'
           = link_to "View Source",user_mail_path(id: @user_mail, view_as: 'source'), class: 'btn btn-secondary'
           div.btn-group.ml-2

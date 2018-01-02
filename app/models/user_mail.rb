@@ -1,8 +1,9 @@
 class UserMail < ApplicationRecord
   belongs_to :mail_account
-  has_many :user_mail_attachments
+  belongs_to :mailbox_folder
+  has_many :user_mail_attachments, dependent: :destroy
 
-  validates :mailbox_id, uniqueness: true
+  validates :message_id, uniqueness: true
 
   mount_uploader :source_file, MailSourceUploader
 
@@ -16,5 +17,9 @@ class UserMail < ApplicationRecord
 
   def source_content
     File.read(source_file.file.file)
+  end
+
+  def has_html?
+    html_content.include?('<html>')
   end
 end
