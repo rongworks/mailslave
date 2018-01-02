@@ -2,13 +2,25 @@ version: '2'
 
 services:
 
-  rails:
-    build: .
-    volumes:
-      - .:/app
-    ports: "3000:3000"
+  app:
+    build:
+      context: .
+      args:
+        - RAILS_ROOT: /app
+    ports:
+      - "3000"
     links:
       - db
-
+  nginx:
+    build:
+      context: ./docker/nginx/Dockerfile
+      args:
+        - RAILS_ROOT: /app
+    links:
+      - app
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/mailslave.conf:ro
+    ports:
+      - "80:80"
   db:
     image: mysql
