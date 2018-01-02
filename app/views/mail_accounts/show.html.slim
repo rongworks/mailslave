@@ -44,7 +44,10 @@ div.row
       strong exclude_folders
       = @mail_account.settings(:sync_options).exclude_folders
   div.col
-    | TODO: FOLDER LIST
+    ul.list-group
+      - @mail_account.mailbox_folders.each do |f|
+        li.list-group-item
+          = f.name
 
 h2 Mails (#{@mail_account.user_mails.count})
 = link_to "Fetch user_mails", pull_imap_mail_account_path(id: @mail_account), :method => :post

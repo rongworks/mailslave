@@ -14,14 +14,14 @@ class MailSync
     folder_list = imap.list('','*').collect {|mbox| mbox.name}
     # TODO: filter folder_list for excluded folders
     folder_list.each do |folder|
-      Rails.logger.info "searching mailbox #{folder} for account #{account.name}"
+      Rails.logger.info "searching mailbox #{folder} for account #{account.name} \n #{search_query}"
       acc_folder = account.find_or_create_folder(folder)
 
-      import_folder(folder, search_query)
+      import_folder(folder, acc_folder.id, search_query)
     end
   end
 
-  def import_folder(folder,search_query)
+  def import_folder(folder,folder_id,search_query)
     imap.examine(folder)
     imap.search(search_query).each do |message_id|
       Rails.logger.info "Processing #{message_id}"
@@ -42,24 +42,27 @@ class MailSync
       m_id = mail_obj.message_id
       m_in_reply_to = mail_obj.in_reply_to
 
+      attrs = {subject: m_subject,
+               from: m_from,
+               to: m_to,
+               receive_date: m_receive_date,
+               plain_content: plain_text,
+               html_content: html_text,
+               message_id: m_id,
+               mailbox_id: message_id,
+               cc: m_cc,
+               bcc: m_bcc,
+               replyto: m_replyto,
+               in_reply_to: m_in_reply_to,
+               conversation: mail_obj.references,
+               folder_id: folder_id}
+
       if UserMail.exists?(:message_id => m_id)
         Rails.logger.info "Existing mail #{m_id} skipped"
         next
       end
 
-      mail = account.user_mails.new(subject: m_subject,
-                                 from: m_from,
-                                 to: m_to,
-                                 receive_date: m_receive_date,
-                                 plain_content: plain_text,
-                                 html_content: html_text,
-                                 message_id: m_id,
-                                 mailbox_id: message_id,
-                                 cc: m_cc,
-                                 bcc: m_bcc,
-                                 replyto: m_replyto,
-                                 in_reply_to: m_in_reply_to
-      )
+      mail = account.user_mails.new(attrs)
       # TODO: mark processed as FLAGGED
       if mail.save
         m_file = CarrierFile.new(mail_obj.to_s)
@@ -112,6 +115,8 @@ class MailSync
         body = part_to_use.body.decoded
         body = body.force_encoding(encoding).encode('UTF-8') if encoding
         return body
+      elsif message.body
+        return message.body.decoded.force_encoding("UTF-8")
       else
         return nil
       end

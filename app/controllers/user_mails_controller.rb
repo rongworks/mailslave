@@ -19,8 +19,9 @@ class UserMailsController < ApplicationController
         @body_content = html.present? ? html.html_safe : "<div>#{@user_mail.plain_content}</div>".html_safe if params['view_as'] == 'html'
         @body_content = @user_mail.plain_content if params['view_as'] == 'plain'
         @body_content = @user_mail.source_content if params['view_as'] == 'source'
-        @prev_mails = UserMail.where(message_id: @user_mail.in_reply_to).order(:receive_date)
-        @next_mails = UserMail.where(in_reply_to: @user_mail.message_id).order(:receive_date)
+        ref_mails = UserMail.where('conversation LIKE ?', "%#{@user_mail.message_id}%").order(:receive_date)
+        @prev_mails = ref_mails.select{ |m| m.receive_date < @user_mail.receive_date}
+        @next_mails = ref_mails.select{ |m| m.receive_date >= @user_mail.receive_date}
       end
       format.json {}
       format.eml do
