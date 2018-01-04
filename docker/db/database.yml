@@ -9,9 +9,10 @@ default: &default
   pool: 5
   timeout: 5000
   encoding: utf8
+  host: db
   username: root
-  password:
-  socket: /tmp/mysql.sock
+  password: <%= ENV['SQL_PW'] %>
+  #socket: /tmp/mysql.sock
 
 development:
   <<: *default
