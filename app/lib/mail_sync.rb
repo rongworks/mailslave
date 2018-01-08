@@ -2,7 +2,7 @@ require 'net/imap'
 require 'mail'
 
 class MailSync
-  attr_accessor :account, :imap
+  attr_accessor :account, :imap, :cnt_mails_skipped, :cnt_mails_processed, :cnt_mails_new
 
   def initialize(account)
     self.account = account
@@ -11,6 +11,10 @@ class MailSync
   end
 
   def sync(folder_excludes, search_query)
+    @cnt_mails_new = 0
+    @cnt_mails_processed = 0
+    @cnt_mails_skipped = 0
+
     folder_list = imap.list('','*').collect {|mbox| mbox.name}
     # TODO: filter folder_list for excluded folders
     folder_list.each do |folder|
@@ -18,13 +22,17 @@ class MailSync
       acc_folder = account.find_or_create_folder(folder)
 
       import_folder(folder, acc_folder.id, search_query)
+      Rails.logger.info "Sync job complete:
+                        #{@cnt_mails_processed} mails processed |
+                        #{@cnt_mails_skipped} mails skipped |
+                        #{@cnt_mails_new} new mails archived !"
     end
   end
 
   def import_folder(folder,folder_id,search_query)
     imap.examine(folder)
     imap.search(search_query).each do |message_id|
-      Rails.logger.info "Processing #{message_id}"
+      Rails.logger.debug "Processing #{message_id}"
 
       # fetch all the email contents
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
@@ -58,13 +66,17 @@ class MailSync
                folder_id: folder_id}
 
       if UserMail.exists?(:message_id => m_id)
-        Rails.logger.info "Existing mail #{m_id} skipped"
+        Rails.logger.debug "Existing mail #{m_id} skipped"
+        @cnt_mails_skipped += 1
         next
+      else
+        @cnt_mails_processed += 1
       end
 
       mail = account.user_mails.new(attrs)
       # TODO: mark processed as FLAGGED
       if mail.save
+        @cnt_mails_new += 1
         m_file = CarrierFile.new(mail_obj.to_s)
         m_file.original_filename = "mail_source_#{mail.id}.eml"
         m_file.content_type = mail_obj.mime_type
@@ -79,7 +91,7 @@ class MailSync
           mail.user_mail_attachments.create(file: document )
         end
       else
-        logger.error(mail.errors.full_messages)
+        Rails.logger.error(mail.errors.full_messages)
       end
     end
   end
@@ -118,6 +130,7 @@ class MailSync
       elsif message.body
         return message.body.decoded.force_encoding("UTF-8")
       else
+        Rails.logger.warn "No message detected in #{message.message_id} for #{content_type}"
         return nil
       end
       #return message.decoded
