@@ -27,9 +27,9 @@ COPY Gemfile.lock $RAILS_ROOT
 RUN gem install bundler && \
   bundle install --without development test
 
-COPY . $APP_SRC
-COPY docker/db/database.yml $APP_SRC/config/database.yml
-COPY docker/app_entrypoint.sh /entry/app_entrypoint.sh
+COPY . $RAILS_ROOT
+COPY docker/db/database.yml $RAILS_ROOT/config/database.yml
+COPY docker/mailslave/app_entrypoint.sh /entry/app_entrypoint.sh
 
 EXPOSE 3000
 #CMD ["rails", "server", "-b", "0.0.0.0"]

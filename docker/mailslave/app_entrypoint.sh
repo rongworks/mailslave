@@ -3,8 +3,8 @@
 cd ${RAILS_ROOT}
 pwd
 
-echo "COPYING ${APP_SRC} TO ${RAILS_ROOT}"
-/bin/cp -Rf ${APP_SRC}/. ${RAILS_ROOT}
+#echo "COPYING ${APP_SRC} TO ${RAILS_ROOT}"
+#/bin/cp -Rf ${APP_SRC}/. ${RAILS_ROOT}
 
 echo "REMOVING SERVER PID"
 rm tmp/pids/server.pid

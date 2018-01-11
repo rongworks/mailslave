@@ -2,47 +2,53 @@ version: '2'
 
 services:
 
-  app:
+  mailslave:
     build:
       context: .
+      dockerfile: ./docker/mailslave/Dockerfile
       args:
         RAILS_ROOT: /app
         APP_SRC: ${APP_SRC}
     volumes:
-      - app_vol:/app
+      - mailslave_storage:/app/storage
+      - mailslave_logs:/app/log
     ports:
       - "3000"
     links:
-      - db
+      - mailslave_db
     environment:
       - SQL_PW=${SQL_PW}
       - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     depends_on:
-      - db
-  nginx:
+      - mailslave_db
+  mailslave_nginx:
     build:
-      context: ./docker/nginx/
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
       args:
         RAILS_ROOT: /app
     links:
-      - app
+      - mailslave
     depends_on:
-      - app
+      - mailslave
     volumes:
-      - app_vol:/app
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "80:80"
-  db:
+  mailslave_db:
     image: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${SQL_PW}
+    volumes:
+      - mailslave_sql:/var/lib/mysql
   adminer:
     image: adminer
     restart: always
     ports:
       - "8080:8080"
     links:
-      - db
+      - mailslave_db
 volumes:
-  app_vol:
+  mailslave_storage:
+  mailslave_logs:
+  mailslave_sql:

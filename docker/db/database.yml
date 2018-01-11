@@ -9,7 +9,7 @@ default: &default
   pool: 5
   timeout: 5000
   encoding: utf8
-  host: db
+  host: mailslave_db
   username: root
   password: <%= ENV['SQL_PW'] %>
   #socket: /tmp/mysql.sock
