@@ -37,6 +37,9 @@ gem 'jbuilder', '~> 2.5'
 # gem 'capistrano-rails', group: :development
 group :production do
   gem 'mysql2'
+  gem 'lograge'
+  gem 'logstash-event'
+  gem 'daemons'
 end
 
 group :development, :test do
@@ -77,6 +80,7 @@ gem 'bootstrap-will_paginate'
 gem 'popper_js'
 gem 'ransack'
 gem 'ledermann-rails-settings'
+
 
 group :development, :test do
   gem "database_cleaner"
