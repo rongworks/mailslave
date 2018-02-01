@@ -1,3 +1,4 @@
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -53,9 +54,8 @@ Rails.application.configure do
   # routes, locales, etc. This feature depends on the listen gem.
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
-  logger           = ActiveSupport::Logger.new(STDOUT)
-  logger.formatter = config.log_formatter
-  config.logger = ActiveSupport::TaggedLogging.new(logger)
+  config.logger = LogStashLogger.new(type: :file, path: 'log/log_stash_development.log', sync: true)
   config.log_level = :info
-
+  config.lograge.enabled = true
+  config.lograge.formatter = Lograge::Formatters::Logstash.new
 end

@@ -18,7 +18,7 @@ class MailSync
     folder_list = imap.list('','*').collect {|mbox| mbox.name}
     # TODO: filter folder_list for excluded folders
     folder_list.each do |folder|
-      Rails.logger.info "searching mailbox #{folder} for account #{account.name} \n #{search_query}"
+      Rails.logger.info message:"searching mailbox", query: search_query, account: account.id, mailbox:folder
       acc_folder = account.find_or_create_folder(folder)
 
       import_folder(folder, acc_folder.id, search_query)
@@ -32,7 +32,7 @@ class MailSync
   def import_folder(folder,folder_id,search_query)
     imap.examine(folder)
     imap.search(search_query).each do |message_id|
-      Rails.logger.debug "Processing #{message_id}"
+      Rails.logger.debug message:"Processing #{message_id}",mailbox:folder
 
       # fetch all the email contents
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']

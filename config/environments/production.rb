@@ -83,4 +83,9 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  config.logger = LogStashLogger.new(type: :file, path: 'log/log_stash_development.log', sync: true)
+  config.log_level = :info
+  config.lograge.enabled = true
+  config.lograge.formatter = Lograge::Formatters::Logstash.new
 end
