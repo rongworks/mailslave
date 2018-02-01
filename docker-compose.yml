@@ -34,7 +34,7 @@ services:
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
-      - "80:80"
+      - "8081:80"
   mailslave_db:
     image: mysql
     environment:
