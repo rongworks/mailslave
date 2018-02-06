@@ -12,6 +12,7 @@ services:
     volumes:
       - mailslave_storage:/app/storage
       - mailslave_logs:/app/log
+      - ./docker/mailslave/logrotate/mailslave:/etc/logrotate.d/mailslave
     ports:
       - "3000"
     links:
