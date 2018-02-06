@@ -17,6 +17,7 @@ rails db:create
 rails db:migrate
 rails db:seed
 bundle exec crono start
+bin/delayed_job -n 15 start
 
 echo "STARTING SERVER"
 rails server -b 0.0.0.0

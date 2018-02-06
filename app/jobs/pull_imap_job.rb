@@ -3,7 +3,7 @@ class PullImapJob < ApplicationJob
 
   def perform(*args)
     MailAccount.all.each do |account|
-      account.delay.pull_imap(:queue => 'imap')
+      account.delay(:queue => 'imap').pull_imap
     end
   end
 end
