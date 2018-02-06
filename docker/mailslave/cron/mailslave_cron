@@ -1,0 +1,4 @@
+#!/bin/bash
+cd /app &&
+bundle exec crono start &&
+bin/delayed_job -n 15 start

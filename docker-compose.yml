@@ -13,6 +13,7 @@ services:
       - mailslave_storage:/app/storage
       - mailslave_logs:/app/log
       - ./docker/mailslave/logrotate/mailslave:/etc/logrotate.d/mailslave
+      - ./docker/mailslave/cron/mailslave_cron:/etc/cron.daily/mailslave.cron
     ports:
       - "3000"
     links:
