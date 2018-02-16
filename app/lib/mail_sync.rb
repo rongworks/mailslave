@@ -38,8 +38,8 @@ class MailSync
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
       # instantiate a UserMail object to avoid further IMAP parameters nightmares
       mail_obj = Mail.read_from_string msg
-      plain_text = body_in_utf8(mail_obj,'text/plain')
-      html_text = body_in_utf8(mail_obj,'text/html')
+      plain_text = body_in_utf8(mail_obj,'text/plain').truncate(20000)
+      html_text = body_in_utf8(mail_obj,'text/html').truncate(20000)
       m_subject = mail_obj.subject
       m_from = mail_obj.from
       m_to = mail_obj.to
