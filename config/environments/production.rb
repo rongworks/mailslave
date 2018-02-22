@@ -56,6 +56,9 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "MailSlave_#{Rails.env}"
   config.action_mailer.perform_caching = false
+  config.action_mailer.delivery_method = :sendmail
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
@@ -88,4 +91,12 @@ Rails.application.configure do
   config.log_level = :info
   config.lograge.enabled = true
   config.lograge.formatter = Lograge::Formatters::Logstash.new
+
+  Rails.application.config.middleware.use ExceptionNotification::Rack,
+                                          :email => {
+                                              :deliver_with => :deliver, # Rails >= 4.2.1 do not need this option since it defaults to :deliver_now
+                                              :email_prefix => "[MAILSLAVE-ERROR] ",
+                                              :sender_address => %{"notifier" <technik@kaiser-tappe.de>},
+                                              :exception_recipients => %w{technik@kaiser-tappe.de}
+                                          }
 end

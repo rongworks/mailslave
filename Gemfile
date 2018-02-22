@@ -38,6 +38,7 @@ gem 'jbuilder', '~> 2.5'
 group :production do
   gem 'mysql2'
   gem 'daemons'
+  gem 'exception_notification'
 end
 
 group :development, :test do
