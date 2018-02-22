@@ -112,7 +112,11 @@ class MailSync
         if part_to_use.content_type[content_type]
           encoding = part_to_use.content_type_parameters['charset'] if part_to_use.content_type_parameters
           body = part_to_use.body.decoded
-          body = body.force_encoding(encoding).encode('UTF-8') if encoding
+          if check_encoding(encoding)
+            body = body.force_encoding(encoding).encode('UTF-8')
+          else
+            body = body.force_encoding('UTF-8').encode('UTF-8')
+          end
           body_text += body
         end
         if part_to_use.multipart?
@@ -125,7 +129,11 @@ class MailSync
       if part_to_use
         encoding = part_to_use.content_type_parameters['charset'] if part_to_use.content_type_parameters
         body = part_to_use.body.decoded
-        body = body.force_encoding(encoding).encode('UTF-8') if encoding
+        if check_encoding(encoding)
+          body = body.force_encoding(encoding).encode('UTF-8')
+        else
+          body = body.force_encoding('UTF-8').encode('UTF-8')
+        end
         return body
       elsif message.body
         return message.body.decoded.force_encoding("UTF-8")
@@ -137,4 +145,9 @@ class MailSync
     end
 
   end
+
+  def check_encoding(encoding_str)
+    Encoding.name_list.any?{ |encoding| encoding.casecmp(encoding_str).zero? }
+  end
+
 end
