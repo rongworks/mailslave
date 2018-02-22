@@ -43,6 +43,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${SQL_PW}
     volumes:
       - mailslave_sql:/var/lib/mysql
+      - ./docker/db/mycnf.cnf:/etc/mysql/conf.d/mycnf.cnf
   adminer:
     image: adminer
     restart: always
