@@ -20,6 +20,6 @@ class UserMail < ApplicationRecord
   end
 
   def has_html?
-    html_content.include?('<html>')
+    html_content && html_content.include?('<html>')
   end
 end

@@ -38,8 +38,11 @@ class MailSync
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
       # instantiate a UserMail object to avoid further IMAP parameters nightmares
       mail_obj = Mail.read_from_string msg
-      plain_text = body_in_utf8(mail_obj,'text/plain').truncate(20000)
-      html_text = body_in_utf8(mail_obj,'text/html').truncate(20000)
+      contents = parse_body(mail_obj)
+      plain_text = contents['text/plain']
+      html_text = contents['text/html']
+      #plain_text = body_in_utf8(mail_obj,'text/plain').truncate(20000)
+      #html_text = body_in_utf8(mail_obj,'text/html').truncate(20000)
       m_subject = mail_obj.subject
       m_from = mail_obj.from
       m_to = mail_obj.to
@@ -105,6 +108,27 @@ class MailSync
     return message.attachments.map(&:filename)
   end
 
+  def parse_body(message)
+    contents = {}
+    if message.multipart?
+      message.parts.each do |part|
+        contents.merge!(parse_body(part)){|key, oldval, newval| oldval + newval}
+      end
+    else
+      content_type_full = message.content_type
+      #encoding = message.content_type_parameters['charset']
+      if content_type_full.blank?
+        content_type = 'other'
+      else
+        splitted = content_type_full.split(';')
+        content_type = splitted[0] unless splitted.length < 1
+      end
+      contents[content_type] = message.decoded
+    end
+    return contents
+  end
+
+=begin TODO:  Safe Delete
   def body_in_utf8(message,content_type)
     if message.multipart?
       body_text = ''
@@ -145,6 +169,7 @@ class MailSync
     end
 
   end
+=end
 
   def check_encoding(encoding_str)
     Encoding.name_list.any?{ |encoding| encoding.casecmp(encoding_str).zero? }
