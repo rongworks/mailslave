@@ -8,6 +8,7 @@ class MailAccount < ApplicationRecord
   belongs_to :user
   has_many :user_mails
   has_many :mailbox_folders, :dependent => :destroy
+  has_one :sync_job
 
   has_settings do |setting|
     setting.key :sync_options, defaults: {

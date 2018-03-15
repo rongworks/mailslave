@@ -11,6 +11,8 @@ class MailSync
   end
 
   def sync(folder_excludes, search_query)
+
+    start_time = Time.now
     @cnt_mails_new = 0
     @cnt_mails_processed = 0
     @cnt_mails_skipped = 0
@@ -26,6 +28,15 @@ class MailSync
                         #{@cnt_mails_processed} mails processed |
                         #{@cnt_mails_skipped} mails skipped |
                         #{@cnt_mails_new} new mails archived !"
+      end_time = Time.now
+      sync_job = account.build_sync_job({
+              sync_start:start_time,
+              sync_end: end_time,
+              processed_entries: @cnt_mails_processed,
+              new_entries: @cnt_mails_new,
+              skipped_entries: @cnt_mails_skipped
+          })
+      account.save!
     end
   end
 

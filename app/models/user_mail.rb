@@ -22,4 +22,8 @@ class UserMail < ApplicationRecord
   def has_html?
     html_content && html_content.include?('<html>')
   end
+
+  def has_text?
+    plain_content.present?
+  end
 end

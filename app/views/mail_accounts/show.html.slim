@@ -24,6 +24,12 @@ div.row
     strong SSL
   div.col-sm-4
     = @mail_account.ssl? ? fa_icon('check') : fa_icon('times')
+div.row
+  div.col-1
+    strong Last sync:
+  div.col-sm-4
+    - job = @mail_account.sync_job
+    = "#{l job.sync_start} (n:#{job.processed_entries} p:#{job.new_entries} s:#{job.skipped_entries})" unless @mail_account.sync_job.nil?
 hr
 
 div.row

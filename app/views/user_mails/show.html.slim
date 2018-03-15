@@ -60,7 +60,7 @@ div.container
         span.h4 = @user_mail.subject
         div.btn-group.view.float-right
           = link_to "View as HTML",user_mail_path(id: @user_mail, view_as: 'html'), class: 'btn btn-secondary' if @user_mail.has_html?
-          = link_to "View as Plain Text",user_mail_path(id: @user_mail, view_as: 'plain'), class: 'btn btn-secondary'
+          = link_to "View as Plain Text",user_mail_path(id: @user_mail, view_as: 'plain'), class: 'btn btn-secondary' if @user_mail.has_text?
           = link_to "View Source",user_mail_path(id: @user_mail, view_as: 'source'), class: 'btn btn-secondary'
           div.btn-group.ml-2
             = link_to "Download",user_mail_path(id: @user_mail, format: 'eml'), class: 'btn btn-secondary'

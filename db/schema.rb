@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171212144732) do
+ActiveRecord::Schema.define(version: 20180315120209) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -69,6 +69,19 @@ ActiveRecord::Schema.define(version: 20171212144732) do
     t.datetime "updated_at"
     t.index ["target_type", "target_id", "var"], name: "index_settings_on_target_type_and_target_id_and_var", unique: true
     t.index ["target_type", "target_id"], name: "index_settings_on_target_type_and_target_id"
+  end
+
+  create_table "sync_jobs", force: :cascade do |t|
+    t.integer  "mail_account_id"
+    t.datetime "sync_start"
+    t.datetime "sync_end"
+    t.integer  "new_entries"
+    t.integer  "skipped_entries"
+    t.integer  "processed_entries"
+    t.text     "info"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.index ["mail_account_id"], name: "index_sync_jobs_on_mail_account_id"
   end
 
   create_table "user_mail_attachments", force: :cascade do |t|
