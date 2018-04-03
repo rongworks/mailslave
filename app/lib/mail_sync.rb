@@ -50,8 +50,8 @@ class MailSync
       # instantiate a UserMail object to avoid further IMAP parameters nightmares
       mail_obj = Mail.read_from_string msg
       contents = parse_body(mail_obj)
-      plain_text = contents['text/plain']
-      html_text = contents['text/html']
+      plain_text = contents['text/plain'].truncate(2621000)
+      html_text = contents['text/html'].truncate(2621000)
       #plain_text = body_in_utf8(mail_obj,'text/plain').truncate(20000)
       #html_text = body_in_utf8(mail_obj,'text/html').truncate(20000)
       m_subject = mail_obj.subject

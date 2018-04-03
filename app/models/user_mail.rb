@@ -4,6 +4,7 @@ class UserMail < ApplicationRecord
   has_many :user_mail_attachments, dependent: :destroy
 
   validates :message_id, uniqueness: true
+  validates :plain_content,:html_content, length: {maximum: 2621000}
 
   mount_uploader :source_file, MailSourceUploader
 

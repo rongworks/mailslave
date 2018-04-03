@@ -5,6 +5,9 @@ class MailAccountPolicy < ApplicationPolicy
   def new?
     true
   end
+  def create?
+    true
+  end
   def edit?
     user.id == record.user_id || user.admin?
   end
