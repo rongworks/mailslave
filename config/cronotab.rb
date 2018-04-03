@@ -11,6 +11,5 @@
    end
  end
 
- Crono.perform(TestJob).every 1.days, at: '00:30'
-#
-Crono.perform(PullImapJob).every 1.days, at: '22:00'
+ Crono.perform(TestJob).every 1.days, at: '12:55'
+ Crono.perform(PullImapJob).every 1.days, at: '13:00'
