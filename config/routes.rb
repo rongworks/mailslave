@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   end
   devise_for :users
 
+
+    mount Crono::Web, at: '/crono'
+
   root to:'mail_accounts#index'
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html

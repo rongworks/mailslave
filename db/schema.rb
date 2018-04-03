@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180315120209) do
+ActiveRecord::Schema.define(version: 20180403084334) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -103,11 +103,11 @@ ActiveRecord::Schema.define(version: 20180315120209) do
     t.string   "bcc"
     t.string   "subject"
     t.integer  "mail_account_id"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
     t.string   "mailbox_id"
-    t.text     "plain_content"
-    t.text     "html_content"
+    t.text     "plain_content",   limit: 10485760
+    t.text     "html_content",    limit: 10485760
     t.string   "source_file"
     t.string   "checksum"
     t.string   "in_reply_to"

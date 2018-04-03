@@ -79,9 +79,15 @@ gem 'bootstrap-will_paginate'
 gem 'popper_js'
 gem 'ransack'
 gem 'ledermann-rails-settings'
+
+# logging
 gem 'lograge'
 gem 'logstash-event'
 gem 'logstash-logger'
+
+#chrono UI
+gem 'haml'
+gem 'sinatra', require: nil
 
 group :development, :test do
   gem "database_cleaner"

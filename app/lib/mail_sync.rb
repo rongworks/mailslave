@@ -22,22 +22,25 @@ class MailSync
     folder_list.each do |folder|
       Rails.logger.info message:"searching mailbox", query: search_query, account: account.id, mailbox:folder
       acc_folder = account.find_or_create_folder(folder)
-
-      import_folder(folder, acc_folder.id, search_query)
-      Rails.logger.info "Sync job complete:
+      begin
+        import_folder(folder, acc_folder.id, search_query)
+      rescue
+        Rails.logger.error "Sync of #{folder} failed"
+      end
+    end
+    Rails.logger.info "Sync job complete:
                         #{@cnt_mails_processed} mails processed |
                         #{@cnt_mails_skipped} mails skipped |
                         #{@cnt_mails_new} new mails archived !"
-      end_time = Time.now
-      sync_job = account.build_sync_job({
-              sync_start:start_time,
-              sync_end: end_time,
-              processed_entries: @cnt_mails_processed,
-              new_entries: @cnt_mails_new,
-              skipped_entries: @cnt_mails_skipped
-          })
-      account.save!
-    end
+    end_time = Time.now
+    sync_job = account.build_sync_job({
+                                          sync_start:start_time,
+                                          sync_end: end_time,
+                                          processed_entries: @cnt_mails_processed,
+                                          new_entries: @cnt_mails_new,
+                                          skipped_entries: @cnt_mails_skipped
+                                      })
+    account.save!
   end
 
   def import_folder(folder,folder_id,search_query)
@@ -50,8 +53,10 @@ class MailSync
       # instantiate a UserMail object to avoid further IMAP parameters nightmares
       mail_obj = Mail.read_from_string msg
       contents = parse_body(mail_obj)
-      plain_text = contents['text/plain'].truncate(2621000)
-      html_text = contents['text/html'].truncate(2621000)
+      plain_text = contents['text/plain']
+      html_text = contents['text/html']
+      plain_text.try(:truncate,2621000)
+      html_text.try(:truncate,2621000)
       #plain_text = body_in_utf8(mail_obj,'text/plain').truncate(20000)
       #html_text = body_in_utf8(mail_obj,'text/html').truncate(20000)
       m_subject = mail_obj.subject
