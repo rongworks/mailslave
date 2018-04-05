@@ -64,6 +64,7 @@ class MailAccountsController < ApplicationController
   end
 
   def pull_imap
+    authorize(@mail_account)
     @mail_account.pull_imap
     redirect_to @mail_account
   end
