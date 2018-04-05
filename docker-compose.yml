@@ -48,6 +48,7 @@ services:
     volumes:
       - mailslave_sql:/var/lib/mysql
       - ./docker/db/mycnf.cnf:/etc/mysql/conf.d/mycnf.cnf
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
   adminer:
     image: adminer
     restart: always
