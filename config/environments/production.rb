@@ -65,6 +65,7 @@ Rails.application.configure do
       :domain         => 'rongworks.de',
       :enable_starttls_auto => true,
       :authentication => 'login',
+      :ssl => true,
   }
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
