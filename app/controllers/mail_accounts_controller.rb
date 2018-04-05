@@ -27,6 +27,7 @@ class MailAccountsController < ApplicationController
   # POST /mail_accounts.json
   def create
     @mail_account = MailAccount.new(mail_account_params)
+    authorize(@mail_account)
 
     respond_to do |format|
       if @mail_account.save
@@ -65,7 +66,7 @@ class MailAccountsController < ApplicationController
 
   def pull_imap
     authorize(@mail_account)
-    @mail_account.pull_imap
+    @mail_account.delay(queue:'sync').pull_imap
     redirect_to @mail_account
   end
 

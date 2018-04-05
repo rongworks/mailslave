@@ -6,7 +6,7 @@ class MailAccount < ApplicationRecord
   crypt_keeper :login, :password , encryptor: :aes_new, key: 'gotMailSlaveToEncrypt', salt: 'salt'
 
   belongs_to :user
-  has_many :user_mails
+  has_many :user_mails, :inverse_of => :mail_account
   has_many :mailbox_folders, :dependent => :destroy
   has_one :sync_job
 

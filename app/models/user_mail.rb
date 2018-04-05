@@ -1,6 +1,6 @@
 class UserMail < ApplicationRecord
-  belongs_to :mail_account
-  belongs_to :mailbox_folder
+  belongs_to :mail_account, :inverse_of => :user_mails
+  belongs_to :mailbox_folder, :inverse_of => :user_mails
   has_many :user_mail_attachments, dependent: :destroy
 
   validates :message_id, uniqueness: true

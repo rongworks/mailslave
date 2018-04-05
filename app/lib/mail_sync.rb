@@ -53,10 +53,9 @@ class MailSync
       # instantiate a UserMail object to avoid further IMAP parameters nightmares
       mail_obj = Mail.read_from_string msg
       contents = parse_body(mail_obj)
-      plain_text = contents['text/plain']
-      html_text = contents['text/html']
-      plain_text.try(:truncate,2621000)
-      html_text.try(:truncate,2621000)
+      plain_text = contents['text/plain'].try(:truncate,2621000)
+      html_text = contents['text/html'].try(:truncate,2621000)
+
       #plain_text = body_in_utf8(mail_obj,'text/plain').truncate(20000)
       #html_text = body_in_utf8(mail_obj,'text/html').truncate(20000)
       m_subject = mail_obj.subject
@@ -110,7 +109,8 @@ class MailSync
           mail.user_mail_attachments.create(file: document )
         end
       else
-        Rails.logger.error(mail.errors.full_messages)
+        Rails.logger.error(mail.errors.full_messages + mail.inspect)
+        raise mail.errors.full_messages
       end
     end
   end

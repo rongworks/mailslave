@@ -1,0 +1,11 @@
+h1 Logs
+
+
+div.row
+  -@logs.each do |log|
+    div.col-2
+      = log['severity']
+    div.col-2
+      =log['@timestamp']
+    div.col-8
+      =log['message']

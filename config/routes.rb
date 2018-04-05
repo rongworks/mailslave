@@ -9,7 +9,10 @@ Rails.application.routes.draw do
   devise_for :users
 
 
-    mount Crono::Web, at: '/crono'
+  mount Crono::Web, at: '/crono'
+
+  match "/delayed_job" => DelayedJobWeb, :anchor => false, :via => [:get, :post]
+  get "logs/:lines" => 'log_view#index', as:'log'
 
   root to:'mail_accounts#index'
 
