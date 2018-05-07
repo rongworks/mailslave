@@ -27,4 +27,9 @@ class UserMail < ApplicationRecord
   def has_text?
     plain_content.present?
   end
+
+  def get_filename
+    sbj_name = subject.gsub(/[^0-9A-z.\-]/, '_').truncate(25, omission:'__')
+    return "#{id}_#{sbj_name}.eml"
+  end
 end
