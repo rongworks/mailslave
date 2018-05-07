@@ -7,6 +7,6 @@ class UserMailAttachment < ApplicationRecord
   end
 
   def get_foldername
-    return "#{user_mail.mail_account.email}"
+    return "#{user_mail.mail_account.email}/attachments"
   end
 end
