@@ -16,7 +16,7 @@ class MailAccount < ApplicationRecord
       only_seen: true, # only seen messages get archived
       only_older_than: 0, # only archive messages older than X days
       delete_after: 30, # delete messages that are older than x days TODO: implement
-      exclude_folders: 'INBOX.mailslave_archive,INBOX.Junk,INBOX.Spam', # list of folders, that are not archived TODO: implement
+      exclude_folders: 'INBOX.Junk,INBOX.Spam', # list of folders, that are not archived TODO: implement
       archive_folder_name: 'INBOX.mailslave_archive'
     }
   end
@@ -39,7 +39,7 @@ class MailAccount < ApplicationRecord
   end
 
   def exclude_folders
-    return settings(:sync_options).exclude_folders.split(",").map(&:strip)
+    return settings(:sync_options).exclude_folders.split(",").map(&:strip) << settings(:sync_options).archive_folder_name
   end
 
 end

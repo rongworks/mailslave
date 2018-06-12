@@ -23,7 +23,7 @@ class UserMailsController < ApplicationController
           @prev_mails = []
         else
           ref_mails = @user_mail.conversation.gsub(/[\\\[\]\"]/,'').split(',').map(&:strip)
-          @prev_mails = UserMail.where(message_id: ref_mails)
+          @prev_mails = UserMail.where(message_id: ref_mails).order(:receive_date)
 
         end
         #@prev_mails = ref_mails.collect{|ma| UserMail.find_by(message_id:ma)}
@@ -81,7 +81,7 @@ class UserMailsController < ApplicationController
   def destroy
     @user_mail.destroy
     respond_to do |format|
-      format.html { redirect_to userMails_url, notice: 'UserMail was successfully destroyed.' }
+      format.html { redirect_to user_mails_url, notice: 'UserMail was successfully destroyed.' }
       format.json { head :no_content }
     end
   end

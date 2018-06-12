@@ -4,12 +4,12 @@ div.container
     ol.breadcrumb
       - @prev_mails.each do |rmail|
         li.breadcrumb-item
-          = link_to "#{rmail.subject}(#{rmail.receive_date})", rmail
+          = link_to "#{rmail.subject}(#{l rmail.receive_date})", rmail
       li.breadcrumb-item.active
-        = @user_mail.subject
+        = "#{@user_mail.subject}(#{l @user_mail.receive_date})"
       - @next_mails.each do |rmail|
         li.breadcrumb-item
-          = link_to "#{rmail.subject}(#{rmail.receive_date})", rmail
+          = link_to "#{rmail.subject}(#{l rmail.receive_date})", rmail
   div.btn-group.d-print-none.float-right
     = link_to 'Back', user_mails_path, class:"btn btn-secondary"
 

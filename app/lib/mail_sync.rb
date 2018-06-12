@@ -47,6 +47,7 @@ class MailSync
   def import_folder(folder,folder_id,search_query)
     imap.examine(folder)
     archive_folder_name = account.settings(:sync_options).archive_folder_name
+    imap.create(archive_folder_name) if imap.list('',archive_folder_name).nil?
     imap.search(search_query).each do |message_id|
       Rails.logger.debug message:"Processing #{message_id}",mailbox:folder
 
@@ -120,11 +121,13 @@ class MailSync
 
 
       Rails.logger.info("Mail #{mail.id}: received:#{mail.receive_date} due:#{due_date}")
-      if archive && !mail.archived?
+      if archive
+        if mail.archived?
+          Rails.logger.warn("Mail #{mail.id} was archived but not moved to archive")
+        end
         Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
-        imap.create(archive_folder_name) if imap.list('',archive_folder_name).nil?
-        imap.copy(message_id, archive_folder_name)
-        imap.store(message_id, "+FLAGS", [:Deleted])
+        imap.uid_copy(message_id, archive_folder_name)
+        imap.uid_store(message_id, "+FLAGS", [:Deleted])
         mail.update_attribute(:archived, true)
       end
     end
