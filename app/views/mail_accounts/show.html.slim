@@ -30,6 +30,8 @@ div.row
   div.col-sm-4
     - job = @mail_account.sync_job
     = "#{l job.sync_start} (n:#{job.processed_entries} p:#{job.new_entries} s:#{job.skipped_entries})" unless @mail_account.sync_job.nil?
+    pre
+      = job.info
 hr
 
 div.row

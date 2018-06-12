@@ -15,8 +15,8 @@ class MailAccount < ApplicationRecord
       interval: 100800, # interval for retrieving TODO: implement
       only_seen: true, # only seen messages get archived
       only_older_than: 0, # only archive messages older than X days
-      delete_after: 30, # delete messages that are older than x days TODO: implement
-      exclude_folders: 'INBOX.Junk,INBOX.Spam', # list of folders, that are not archived TODO: implement
+      delete_after: 30, # delete messages that are older than x days
+      exclude_folders: 'INBOX.Junk,INBOX.Spam',
       archive_folder_name: 'INBOX.mailslave_archive'
     }
   end

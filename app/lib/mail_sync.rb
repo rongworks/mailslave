@@ -2,7 +2,7 @@ require 'net/imap'
 require 'mail'
 
 class MailSync
-  attr_accessor :account, :imap, :cnt_mails_skipped, :cnt_mails_processed, :cnt_mails_new
+  attr_accessor :account, :imap, :cnt_mails_skipped, :cnt_mails_processed, :cnt_mails_new, :cnt_mails_archived, :sync_info
 
   def initialize(account)
     self.account = account
@@ -16,10 +16,10 @@ class MailSync
     @cnt_mails_new = 0
     @cnt_mails_processed = 0
     @cnt_mails_skipped = 0
+    @cnt_mails_archived = 0
+    @sync_info = ''
 
     folder_list = imap.list('','*').collect {|mbox| mbox.name} - folder_excludes
-
-    # TODO: filter folder_list for excluded folders
     folder_list.each do |folder|
       Rails.logger.info message:"searching mailbox #{folder}", query: search_query, account: account.id, mailbox:folder
       acc_folder = account.find_or_create_folder(folder)
@@ -27,29 +27,34 @@ class MailSync
         import_folder(folder, acc_folder.id, search_query)
       rescue StandardError => e
         Rails.logger.error "Sync of #{folder} failed.\n #{e.message}"
+        @sync_info += "Sync of #{folder} failed.\n #{e.message} \n"
       end
     end
     Rails.logger.info "Sync job complete:
                         #{@cnt_mails_processed} mails processed |
                         #{@cnt_mails_skipped} mails skipped |
-                        #{@cnt_mails_new} new mails archived !"
+                        #{@cnt_mails_new} new mails |
+                        #{@cnt_mails_archived} mails archived !"
     end_time = Time.now
     sync_job = account.build_sync_job({
                                           sync_start:start_time,
                                           sync_end: end_time,
                                           processed_entries: @cnt_mails_processed,
                                           new_entries: @cnt_mails_new,
-                                          skipped_entries: @cnt_mails_skipped
+                                          skipped_entries: @cnt_mails_skipped,
+                                          archived_entries: @cnt_mails_archived,
+                                          info: @sync_info
                                       })
     account.save!
   end
 
   def import_folder(folder,folder_id,search_query)
-    imap.examine(folder)
+    imap.select(folder)
     archive_folder_name = account.settings(:sync_options).archive_folder_name
     imap.create(archive_folder_name) if imap.list('',archive_folder_name).nil?
     imap.search(search_query).each do |message_id|
       Rails.logger.debug message:"Processing #{message_id}",mailbox:folder
+      @cnt_mails_processed += 1
 
       # fetch all the email contents
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
@@ -90,16 +95,18 @@ class MailSync
                folder_id: folder_id,
                archived: archive}
 
+      m_desc = "#{message_id} / #{m_subject.truncate(25)}"
       # TODO: if exist, compare checksums
       if UserMail.exists?(:message_id => m_id)
         Rails.logger.info "Existing mail #{m_id} skipped"
         @cnt_mails_skipped += 1
+        @sync_info += "#{folder}:#{m_desc} - existing entry \n"
         mail = UserMail.where(message_id: m_id).first
       else
-        @cnt_mails_processed += 1
         mail = account.user_mails.new(attrs)
         if mail.save
           @cnt_mails_new += 1
+          @sync_info += "#{folder}:#{m_desc} - new entry \n"
           m_file = CarrierFile.new(mail_obj.to_s)
           m_file.original_filename = "mail_source_#{mail.id}.eml"
           m_file.content_type = mail_obj.mime_type
@@ -126,13 +133,14 @@ class MailSync
           Rails.logger.warn("Mail #{mail.id} was archived but not moved to archive")
         end
         Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
-        imap.uid_copy(message_id, archive_folder_name)
-        imap.uid_store(message_id, "+FLAGS", [:Deleted])
+        imap.copy(message_id, archive_folder_name)
+        imap.store(message_id, "+FLAGS", [:Deleted])
         mail.update_attribute(:archived, true)
+        @cnt_mails_archived += 1
+        @sync_info += "#{folder}:#{m_desc} - archived \n"
       end
     end
     imap.expunge
-    #TODO: imap.expunge
   end
 
   def disconnect
@@ -164,48 +172,6 @@ class MailSync
     return contents
   end
 
-=begin TODO:  Safe Delete
-  def body_in_utf8(message,content_type)
-    if message.multipart?
-      body_text = ''
-      message.parts.each do |part_to_use|
-        if part_to_use.content_type[content_type]
-          encoding = part_to_use.content_type_parameters['charset'] if part_to_use.content_type_parameters
-          body = part_to_use.body.decoded
-          if check_encoding(encoding)
-            body = body.force_encoding(encoding).encode('UTF-8')
-          else
-            body = body.force_encoding('UTF-8').encode('UTF-8')
-          end
-          body_text += body
-        end
-        if part_to_use.multipart?
-          body_text += body_in_utf8(part_to_use,content_type)
-        end
-      end
-      return body_text
-    else
-      part_to_use = message.find_first_mime_type(content_type)
-      if part_to_use
-        encoding = part_to_use.content_type_parameters['charset'] if part_to_use.content_type_parameters
-        body = part_to_use.body.decoded
-        if check_encoding(encoding)
-          body = body.force_encoding(encoding).encode('UTF-8')
-        else
-          body = body.force_encoding('UTF-8').encode('UTF-8')
-        end
-        return body
-      elsif message.body
-        return message.body.decoded.force_encoding("UTF-8")
-      else
-        Rails.logger.warn "No message detected in #{message.message_id} for #{content_type}"
-        return nil
-      end
-      #return message.decoded
-    end
-
-  end
-=end
 
   def check_encoding(encoding_str)
     Encoding.name_list.any?{ |encoding| encoding.casecmp(encoding_str).zero? }
