@@ -15,6 +15,7 @@
 /log/*
 /tmp/cache/*
 /tmp/sockets/*
+/tmp/pids/*.pid
 !/log/.keep
 
 
