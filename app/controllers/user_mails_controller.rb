@@ -19,9 +19,15 @@ class UserMailsController < ApplicationController
         @body_content = html.present? ? html.html_safe : "<div>#{@user_mail.plain_content}</div>".html_safe if params['view_as'] == 'html'
         @body_content = @user_mail.plain_content if params['view_as'] == 'plain'
         @body_content = @user_mail.source_content if params['view_as'] == 'source'
-        ref_mails = UserMail.where('conversation LIKE ?', "%#{@user_mail.message_id}%").order(:receive_date)
-        @prev_mails = ref_mails.select{ |m| m.receive_date < @user_mail.receive_date}
-        @next_mails = ref_mails.select{ |m| m.receive_date >= @user_mail.receive_date}
+        if @user_mail.conversation.nil?
+          @prev_mails = []
+        else
+          ref_mails = @user_mail.conversation.gsub(/[\\\[\]\"]/,'').split(',').map(&:strip)
+          @prev_mails = UserMail.where(message_id: ref_mails)
+
+        end
+        #@prev_mails = ref_mails.collect{|ma| UserMail.find_by(message_id:ma)}
+        @next_mails = UserMail.where('conversation LIKE ?', "%#{@user_mail.message_id}%").order(:receive_date)
       end
       format.json {}
       format.eml do
@@ -83,8 +89,9 @@ class UserMailsController < ApplicationController
   def download_attachment
     filename = params[:filename]
     if filename.present?
-      att = @user_mail.get_attachment(filename)
-      send_data att,filename: filename
+      #att = @user_mail.get_attachment(filename)
+      att = @user_mail.user_mail_attachments.detect {|f| f.filename == filename}
+      send_file att.file.file.file,filename: filename
     end
   end
 
@@ -98,6 +105,6 @@ class UserMailsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def mail_params
-      params.require(:user_mail).permit(:from, :to, :replyto, :receive_date, :envelope_from, :message_id, :cc, :bcc, :body, :subject)
+      params.require(:user_mail).permit(:from, :to, :replyto, :receive_date, :envelope_from, :message_id, :cc, :bcc, :body, :subject, :conversation, :archived)
     end
 end

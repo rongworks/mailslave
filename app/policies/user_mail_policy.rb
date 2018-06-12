@@ -1,6 +1,6 @@
 class UserMailPolicy < ApplicationPolicy
   def download_attachment?
-    !user.present?
+    user.present?
   end
   class Scope < Scope
     def resolve

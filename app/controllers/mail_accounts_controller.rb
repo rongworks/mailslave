@@ -66,7 +66,8 @@ class MailAccountsController < ApplicationController
 
   def pull_imap
     authorize(@mail_account)
-    @mail_account.delay(queue:'sync').pull_imap
+    #@mail_account.delay(queue:'sync').pull_imap
+    @mail_account.pull_imap
     redirect_to @mail_account
   end
 

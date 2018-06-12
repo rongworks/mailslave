@@ -2,6 +2,10 @@ class UserMailAttachment < ApplicationRecord
   belongs_to :user_mail
   mount_uploader :file, AttachedFileUploader
 
+  def filename
+    file_identifier
+  end
+
   def get_filename
     return "#{user_mail.id}_#{file.filename}"
   end

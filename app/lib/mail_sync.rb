@@ -17,15 +17,16 @@ class MailSync
     @cnt_mails_processed = 0
     @cnt_mails_skipped = 0
 
-    folder_list = imap.list('','*').collect {|mbox| mbox.name}
+    folder_list = imap.list('','*').collect {|mbox| mbox.name} - folder_excludes
+
     # TODO: filter folder_list for excluded folders
     folder_list.each do |folder|
-      Rails.logger.info message:"searching mailbox", query: search_query, account: account.id, mailbox:folder
+      Rails.logger.info message:"searching mailbox #{folder}", query: search_query, account: account.id, mailbox:folder
       acc_folder = account.find_or_create_folder(folder)
       begin
         import_folder(folder, acc_folder.id, search_query)
-      rescue
-        Rails.logger.error "Sync of #{folder} failed"
+      rescue StandardError => e
+        Rails.logger.error "Sync of #{folder} failed.\n #{e.message}"
       end
     end
     Rails.logger.info "Sync job complete:
@@ -45,6 +46,7 @@ class MailSync
 
   def import_folder(folder,folder_id,search_query)
     imap.examine(folder)
+    archive_folder_name = account.settings(:sync_options).archive_folder_name
     imap.search(search_query).each do |message_id|
       Rails.logger.debug message:"Processing #{message_id}",mailbox:folder
 
@@ -68,6 +70,9 @@ class MailSync
       m_id = mail_obj.message_id
       m_in_reply_to = mail_obj.in_reply_to
 
+      due_date = m_receive_date + account.settings(:sync_options).delete_after.days
+      archive = Date.today > due_date
+
       attrs = {subject: m_subject,
                from: m_from,
                to: m_to,
@@ -81,38 +86,50 @@ class MailSync
                replyto: m_replyto,
                in_reply_to: m_in_reply_to,
                conversation: mail_obj.references,
-               folder_id: folder_id}
+               folder_id: folder_id,
+               archived: archive}
 
+      # TODO: if exist, compare checksums
       if UserMail.exists?(:message_id => m_id)
-        Rails.logger.debug "Existing mail #{m_id} skipped"
+        Rails.logger.info "Existing mail #{m_id} skipped"
         @cnt_mails_skipped += 1
-        next
+        mail = UserMail.where(message_id: m_id).first
       else
         @cnt_mails_processed += 1
+        mail = account.user_mails.new(attrs)
+        if mail.save
+          @cnt_mails_new += 1
+          m_file = CarrierFile.new(mail_obj.to_s)
+          m_file.original_filename = "mail_source_#{mail.id}.eml"
+          m_file.content_type = mail_obj.mime_type
+          mail.source_file = m_file
+          mail.checksum = Digest::SHA2.hexdigest(mail_obj.to_s)
+          mail.save!
+
+          mail_obj.attachments.each do |att|
+            document = CarrierFile.new(att.decoded)
+            document.original_filename = att.filename
+            document.content_type = att.mime_type
+            mail.user_mail_attachments.create(file: document )
+          end
+        else
+          Rails.logger.error(mail.errors.full_messages + mail.inspect)
+          raise mail.errors.full_messages
+        end
       end
 
-      mail = account.user_mails.new(attrs)
-      # TODO: mark processed as FLAGGED
-      if mail.save
-        @cnt_mails_new += 1
-        m_file = CarrierFile.new(mail_obj.to_s)
-        m_file.original_filename = "mail_source_#{mail.id}.eml"
-        m_file.content_type = mail_obj.mime_type
-        mail.source_file = m_file
-        mail.checksum = Digest::SHA2.hexdigest(mail_obj.to_s)
-        mail.save!
 
-        mail_obj.attachments.each do |att|
-          document = CarrierFile.new(att.decoded)
-          document.original_filename = att.filename
-          document.content_type = att.mime_type
-          mail.user_mail_attachments.create(file: document )
-        end
-      else
-        Rails.logger.error(mail.errors.full_messages + mail.inspect)
-        raise mail.errors.full_messages
+      Rails.logger.info("Mail #{mail.id}: received:#{mail.receive_date} due:#{due_date}")
+      if archive && !mail.archived?
+        Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
+        imap.create(archive_folder_name) if imap.list('',archive_folder_name).nil?
+        imap.copy(message_id, archive_folder_name)
+        imap.store(message_id, "+FLAGS", [:Deleted])
+        mail.update_attribute(:archived, true)
       end
     end
+    imap.expunge
+    #TODO: imap.expunge
   end
 
   def disconnect

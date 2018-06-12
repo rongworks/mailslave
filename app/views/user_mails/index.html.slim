@@ -23,6 +23,11 @@ table.table
       tr
         td
           = link_to mail.subject, mail, class:''
+          span.float-right.badge.badge-info
+            = mail.mailbox_folder.name
+          - if mail.archived?
+            span.float-right.badge.badge-warning
+              | archived
         td = email_fields mail.from
         td = email_fields mail.to
         td

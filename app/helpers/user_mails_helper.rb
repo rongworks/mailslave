@@ -15,7 +15,7 @@ module UserMailsHelper
 
   def show_attachments(mail)
     attached_files = mail.user_mail_attachments.map do |att|
-        link_to(att.file_identifier,download_attachment_user_mail_path(filename:att.file_identifier),class:'badge badge-info')
+        link_to(att.filename,download_attachment_user_mail_path(filename:att.filename),class:'badge badge-info')
     end.join().html_safe
   end
 

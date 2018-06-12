@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180403084334) do
+ActiveRecord::Schema.define(version: 20180604105808) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -113,6 +113,7 @@ ActiveRecord::Schema.define(version: 20180403084334) do
     t.string   "in_reply_to"
     t.integer  "folder_id"
     t.text     "conversation"
+    t.boolean  "archived"
   end
 
   create_table "users", force: :cascade do |t|
