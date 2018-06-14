@@ -44,6 +44,7 @@ class UserMail < ApplicationRecord
     if self.source_file.present?
       self.upload_path=file_path
     elsif File.exists?(upload_path) && file_path
+      File.makedirs(File.dirname(upload_path))
       File.rename(upload_path, file_path)
       self.upload_path = file_path
     else

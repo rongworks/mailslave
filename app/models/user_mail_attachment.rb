@@ -19,19 +19,17 @@ class UserMailAttachment < ApplicationRecord
   private
   def upload_location
     upload_path = self.upload_path || ''
+    file_path = self.file.path unless self.file.file.nil?
+
     if self.file.present?
-      file_path = self.file.path
-      if upload_path != file_path
-        if File.exists?(upload_path)
-          File.rename(upload_path, file_path)
-        elsif File.exists?(file_path)
-          self.upload_path = file_path
-        else
-          Rails.logger.error("File for attachment #{id} cannot be found")
-          # TODO: Bad, raise exception
-        end
-        self.upload_path = file_path
-      end
+      self.upload_path=file_path
+    elsif File.exists?(upload_path) && file_path
+      File.makedirs(File.dirname(upload_path))
+      File.rename(upload_path, file_path)
+      self.upload_path = file_path
+    else
+      Rails.logger.error("File for attachment #{id} cannot be found")
+      # TODO: rescan mail?
     end
   end
 end
