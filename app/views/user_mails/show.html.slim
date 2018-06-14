@@ -1,70 +1,68 @@
-div.container
-  div.history
-    strong Related Mails
-    ol.breadcrumb
-      - @prev_mails.each do |rmail|
-        li.breadcrumb-item
-          = link_to "#{rmail.subject}(#{l rmail.receive_date})", rmail
-      li.breadcrumb-item.active
-        = "#{@user_mail.subject}(#{l @user_mail.receive_date})"
-      - @next_mails.each do |rmail|
-        li.breadcrumb-item
-          = link_to "#{rmail.subject}(#{l rmail.receive_date})", rmail
-  div.btn-group.d-print-none.float-right
-    = link_to 'Back', user_mails_path, class:"btn btn-secondary"
+div.container-fluid
+  div.row
+    div.history.col-md-3
+      strong Related Mails
+      div.list-group
+        - @prev_mails.each do |rmail|
+          = link_to "##{rmail.id}:#{rmail.subject}(#{l rmail.receive_date})", rmail, class: 'list-group-item list-group-item-action'
+        a.list-group-item.active.list-group-item-action
+          = "##{@user_mail.id}:#{@user_mail.subject}(#{l @user_mail.receive_date})"
+        - @next_mails.each do |rmail|
+          = link_to "##{rmail.id}:#{rmail.subject}(#{l rmail.receive_date})", rmail, class: 'list-group-item list-group-item-action'
 
-  div.subject
-    div.row
-      div.col
-        h2
-          |Subject:
-          small.text-muted
-            = @user_mail.subject
-      div.col-sm-12
-        small.text-muted
-          strong Message ID:
-          = @user_mail.message_id
-    div.row.content
-      div.col-sm-2
-        strong From:
-      div.col-sm-4
-        = email_fields @user_mail.from
-      div.col-sm-2
-        strong To:
-      div.col-sm-4
-        = email_fields @user_mail.to
-      div.col-sm-2
-        strong Cc:
-      div.col-sm-4
-        = email_fields @user_mail.cc
-      div.col-sm-2
-        strong Bcc:
-      div.col-sm-4
-        = email_fields @user_mail.bcc
-      div.col-sm-2
-        strong Reply_to:
-      div.col-sm-4
-        = email_fields @user_mail.replyto
-      hr
-      div.col-sm-6
-        strong.mr-2 Receive Date:
-        = l @user_mail.receive_date
-    div.row.chview
-      div.col
-        strong Attachments:
-        = show_attachments(@user_mail)
+    div.col-md-6
+      div.subject
+        div.btn-group.d-print-none.float-right
+          = link_to 'Back', user_mails_path, class: "btn btn-secondary"
+        div.row
+          div.col
+            h2
+              ="##{@user_mail.id} - #{@user_mail.subject}"
+          div.col-sm-12
+            small.text-muted
+              strong Message ID:
+              = @user_mail.message_id
+        div.row.content
+          div.col-sm-2
+            strong From:
+          div.col-sm-4
+            = email_fields @user_mail.from
+          div.col-sm-2
+            strong To:
+          div.col-sm-4
+            = email_fields @user_mail.to
+          div.col-sm-2
+            strong Cc:
+          div.col-sm-4
+            = email_fields @user_mail.cc
+          div.col-sm-2
+            strong Bcc:
+          div.col-sm-4
+            = email_fields @user_mail.bcc
+          div.col-sm-2
+            strong Reply_to:
+          div.col-sm-4
+            = email_fields @user_mail.replyto
+          hr
+          div.col-sm-6
+            strong.mr-2 Receive Date:
+            = l @user_mail.receive_date
+        div.row.chview
+          div.col
+            strong Attachments:
+            = show_attachments(@user_mail)
 
-  div
-    div.row
-      div.col.bg-secondary.text-white.content
-        span.h4 = @user_mail.subject
-        div.btn-group.view.float-right
-          = link_to "View as HTML",user_mail_path(id: @user_mail, view_as: 'html'), class: 'btn btn-secondary' if @user_mail.has_html?
-          = link_to "View as Plain Text",user_mail_path(id: @user_mail, view_as: 'plain'), class: 'btn btn-secondary' if @user_mail.has_text?
-          = link_to "View Source",user_mail_path(id: @user_mail, view_as: 'source'), class: 'btn btn-secondary'
-          div.btn-group.ml-2
-            = link_to "Download",user_mail_path(id: @user_mail, format: 'eml'), class: 'btn btn-secondary'
-    div.row.container.textarea
-      div.col.text
-        = display_body(@body_content)
+      div
+        div.row
+          div.col.bg-secondary.text-white.content
+            span.h4 = @user_mail.subject
+            div.btn-group.view.float-right
+              = link_to "View as HTML",user_mail_path(id: @user_mail, view_as: 'html'), class: 'btn btn-secondary' if @user_mail.has_html?
+              = link_to "View as Plain Text",user_mail_path(id: @user_mail, view_as: 'plain'), class: 'btn btn-secondary' if @user_mail.has_text?
+              = link_to "View Source",user_mail_path(id: @user_mail, view_as: 'source'), class: 'btn btn-secondary'
+              div.btn-group.ml-2
+                = link_to "Download",user_mail_path(id: @user_mail, format: 'eml'), class: 'btn btn-secondary'
+        div.row.container.textarea
+          div.col.text
+            = display_body(@body_content)
 
