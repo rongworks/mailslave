@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180612120708) do
+ActiveRecord::Schema.define(version: 20180614110458) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -90,6 +90,7 @@ ActiveRecord::Schema.define(version: 20180612120708) do
     t.string   "file"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+    t.string   "upload_path"
     t.index ["user_mail_id"], name: "index_user_mail_attachments_on_user_mail_id"
   end
 
@@ -115,6 +116,7 @@ ActiveRecord::Schema.define(version: 20180612120708) do
     t.integer  "folder_id"
     t.text     "conversation"
     t.boolean  "archived"
+    t.string   "upload_path"
   end
 
   create_table "users", force: :cascade do |t|

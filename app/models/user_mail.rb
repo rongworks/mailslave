@@ -6,6 +6,8 @@ class UserMail < ApplicationRecord
   validates :message_id, uniqueness: true
   validates :plain_content,:html_content, length: {maximum: 2621000}
 
+  before_save :upload_location
+
   mount_uploader :source_file, MailSourceUploader
 
   ransack_alias :quicksearch, :subject_or_html_content_or_plain_content_or_from_or_to_or_cc_or_bcc
@@ -31,5 +33,24 @@ class UserMail < ApplicationRecord
   def get_filename
     sbj_name = subject.gsub(/[^0-9A-z.\-]/, '_').truncate(25, omission:'__')
     return "#{id}_#{sbj_name}.eml"
+  end
+
+  private
+  def upload_location
+    upload_path = self.upload_path || ''
+    if self.source_file.present?
+      file_path = self.source_file.path
+      if upload_path != file_path
+        if File.exists?(upload_path)
+          File.rename(upload_path, file_path)
+        elsif File.exists?(file_path)
+          self.upload_path = file_path
+        else
+          Rails.logger.error("File for attachment #{id} cannot be found")
+          # TODO: rescan mail?
+        end
+        self.upload_path = file_path
+      end
+    end
   end
 end
