@@ -9,7 +9,7 @@ namespace :legacy do
         id = mail.id
         p "Mail: #{id}"
         p "Original Path: #{mail.upload_path}"
-        mail.upload_path = Rails.root.join("storage/uploads/user_mail/mail_source/#{id}/mail_source_#{id}.eml")
+        mail.upload_path = Rails.root.join("storage/uploads/user_mail/source_file/#{id}/mail_source_#{id}.eml")
         mail.user_mail_attachments.each do |att|
           att.upload_path = Rails.root.join("storage/uploads/user_mail_attachment/file/#{id}/#{att.file_identifier}")
           att.save!
