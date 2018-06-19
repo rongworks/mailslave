@@ -10,24 +10,50 @@ h2
 
 
 div.row
-  div.col-sm-1
-    strong Login:
-  div.col-sm-4
-    = @mail_account.login
-div.row
-  div.col-sm-1
-    strong Host:
-  div.col-sm-4
-    = "#{@mail_account.host}:#{@mail_account.port}"
-div.row
-  div.col-sm-1
-    strong SSL
-  div.col-sm-4
-    = @mail_account.ssl? ? fa_icon('check') : fa_icon('times')
-div.row
-  div.col-1
+  div.col-md-6
+    table
+      thead
+
+      tbody
+        tr
+          td
+            strong = t(:login)
+          td = @mail_account.login
+        tr
+          td
+            strong = t(:host)
+          td = "#{@mail_account.host}:#{@mail_account.port}"
+        tr
+          td
+            strong SSL
+          td = @mail_account.ssl? ? fa_icon('check') : fa_icon('times')
+  div.col-md-6
+    table
+      thead
+
+      tbody
+        tr
+          td
+            strong interval
+          td = @mail_account.settings(:sync_options).interval
+        tr
+          td
+            strong only_seen
+          td = @mail_account.settings(:sync_options).only_seen ? fa_icon('check') : fa_icon('times')
+        tr
+          td
+            strong only_older_than
+          td = " #{@mail_account.settings(:sync_options).only_older_than} days"
+        tr
+          td
+            strong delete_after
+          td = " #{@mail_account.settings(:sync_options).delete_after} days"
+        tr
+          td
+            strong exclude_folders
+          td = @mail_account.settings(:sync_options).exclude_folders
+  div.col-md-6
     strong Last sync:
-  div.col-sm-4
     - job = @mail_account.sync_job
     = "#{l job.sync_start} (n:#{job.processed_entries} p:#{job.new_entries} s:#{job.skipped_entries})" unless @mail_account.sync_job.nil?
     br
@@ -41,49 +67,33 @@ div.row
 hr
 
 div.row
-  div.col
-    div
-      strong interval
-      = @mail_account.settings(:sync_options).interval
-    div
-      strong only_seen
-      = @mail_account.settings(:sync_options).only_seen ? fa_icon('check') : fa_icon('times')
-    div
-      strong only_older_than
-      = " #{@mail_account.settings(:sync_options).only_older_than} days"
-    div
-      strong delete_after
-      = " #{@mail_account.settings(:sync_options).delete_after} days"
-    div
-      strong exclude_folders
-      = @mail_account.settings(:sync_options).exclude_folders
-  div.col
+  div.col-md-2
     ul.list-group
       - @mail_account.mailbox_folders.each do |f|
-        li.list-group-item
+        li.list-group-item title="#{f.name}"
           = f.name
+  div.col
+    h2 Mails (#{@mail_account.user_mails.count})
+    = link_to "Fetch user_mails", pull_imap_mail_account_path(id: @mail_account), :method => :post
 
-h2 Mails (#{@mail_account.user_mails.count})
-= link_to "Fetch user_mails", pull_imap_mail_account_path(id: @mail_account), :method => :post
-
-table.table-striped
-  thead.thead-inverse
-    tr
-      th From
-      th Received
-      th Subject
-      th
-  tbody
-    - @mail_account.user_mails.each do |mail|
-      tr
-        td
-          = mail.from
-        td
-          = mail.receive_date
-        td
-          = mail.subject
-        td
-          = link_to 'Show',user_mail_path(id: mail.id)
+    table.table-striped
+      thead.thead-inverse
+        tr
+          th From
+          th Received
+          th Subject
+          th
+      tbody
+        - @mail_account.user_mails.each do |mail|
+          tr
+            td
+              = mail.from
+            td
+              = mail.receive_date
+            td
+              = mail.subject
+            td
+              = link_to 'Show',user_mail_path(id: mail.id)
 = link_to 'Edit', edit_mail_account_path(@mail_account)
 '  |
 = link_to 'Back', mail_accounts_path
