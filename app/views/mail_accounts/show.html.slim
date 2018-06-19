@@ -75,6 +75,7 @@ div.row
   div.col
     h2 Mails (#{@mail_account.user_mails.count})
     = link_to "Fetch user_mails", pull_imap_mail_account_path(id: @mail_account), :method => :post
+    - @mails = @mail_account.user_mails.paginate(:page => params[:page], :per_page => 15)
 
     table.table-striped
       thead.thead-inverse
@@ -84,7 +85,7 @@ div.row
           th Subject
           th
       tbody
-        - @mail_account.user_mails.each do |mail|
+        - @mails.each do |mail|
           tr
             td
               = mail.from
@@ -94,6 +95,7 @@ div.row
               = mail.subject
             td
               = link_to 'Show',user_mail_path(id: mail.id)
+    = will_paginate @mails
 = link_to 'Edit', edit_mail_account_path(@mail_account)
 '  |
 = link_to 'Back', mail_accounts_path

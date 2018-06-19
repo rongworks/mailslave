@@ -15,3 +15,24 @@
  *= require layout
  *= require datatables
  */
+
+ul.pagination{
+    border: 1px solid grey;
+    border-radius: 8px;
+    border-width: 2px 0px 2px 0px;
+    margin: 0.2em;
+}
+.pagination li {
+    color: black;
+    font-weight: bold;
+    padding: 0.2em;
+    margin: 0.2em;
+}
+
+.pagination li a{
+    color: black;
+}
+
+.pagination li.active a{
+    color: grey;
+}

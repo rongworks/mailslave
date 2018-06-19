@@ -6,7 +6,7 @@ class UserMailsController < ApplicationController
   # GET /user_mails.json
   def index
     @q = UserMail.ransack(params[:q])
-    @user_mails = policy_scope(@q.result)
+    @user_mails = policy_scope(@q.result).paginate(page: params[:page])
   end
 
   # GET /user_mails/1

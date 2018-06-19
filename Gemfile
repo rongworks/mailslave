@@ -80,6 +80,7 @@ gem 'bootstrap-will_paginate'
 gem 'popper_js'
 gem 'ransack'
 gem 'ledermann-rails-settings'
+gem 'will_paginate'
 
 # logging
 gem 'lograge'

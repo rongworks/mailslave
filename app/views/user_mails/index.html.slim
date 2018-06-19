@@ -5,6 +5,8 @@ h1 Listing UserMails
       = f.text_field :quicksearch_cont, class: "radius-left expand", placeholder: "Schnellsuche"
       = f.button fa_icon 'eye', class:'', type:'submit'
 
+
+
 table.table
   thead
     tr
@@ -36,4 +38,6 @@ table.table
         td = email_fields mail.cc
         td = email_fields mail.bcc
 
-br
+
+div
+  = will_paginate @user_mails
