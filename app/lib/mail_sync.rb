@@ -2,12 +2,13 @@ require 'net/imap'
 require 'mail'
 
 class MailSync
-  attr_accessor :account, :imap, :cnt_mails_skipped, :cnt_mails_processed, :cnt_mails_new, :cnt_mails_archived, :sync_info
+  attr_accessor :account, :imap, :cnt_mails_skipped, :cnt_mails_processed, :cnt_mails_new, :cnt_mails_archived, :sync_info, :entry_limit
 
-  def initialize(account)
+  def initialize(account, entry_limit)
     self.account = account
     self.imap = Net::IMAP.new(account.host, account.port, account.ssl)
     self.imap.login(account.login, account.password)
+    self.entry_limit = entry_limit
   end
 
   def sync(folder_excludes, search_query)
@@ -127,7 +128,7 @@ class MailSync
       end
 
 
-      Rails.logger.info("Mail #{mail.id}: received:#{mail.receive_date} due:#{due_date}")
+      #Rails.logger.info("Mail #{mail.id}: received:#{mail.receive_date} due:#{due_date}")
       if archive
         if mail.archived?
           Rails.logger.warn("Mail #{mail.id} was archived but not moved to archive")
@@ -139,6 +140,7 @@ class MailSync
         @cnt_mails_archived += 1
         @sync_info += "#{folder}:#{m_desc} - archived \n"
       end
+      break if @cnt_mails_archived >= entry_limit
     end
     imap.expunge
   end

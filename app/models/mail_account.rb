@@ -12,7 +12,8 @@ class MailAccount < ApplicationRecord
 
   has_settings do |setting|
     setting.key :sync_options, defaults: {
-      interval: 100800, # interval for retrieving TODO: implement
+      interval: 15.minutes, # interval for retrieving TODO: implement
+      entry_limit: 25, # process amount of entries, then wait for next sync
       only_seen: true, # only seen messages get archived
       only_older_than: 0, # only archive messages older than X days
       delete_after: 30, # delete messages that are older than x days
@@ -28,9 +29,12 @@ class MailAccount < ApplicationRecord
       search_query << "BEFORE"
       search_query << (Date.today - settings(:sync_options).only_older_than).strftime('%d-%b-%Y')
     end
-    mail_sync = MailSync.new(self)
+    mail_sync = MailSync.new(self,settings(:sync_options).entry_limit)
     mail_sync.sync(exclude_folders, search_query)
     mail_sync.disconnect
+    interval = settings(:sync_options).interval
+
+    delay(queue: 'sync', run_at: Proc.new { interval.from_now }).pull_imap
   end
 
   def find_or_create_folder(folder)
