@@ -8,7 +8,7 @@ class MailAccount < ApplicationRecord
   belongs_to :user
   has_many :user_mails, :inverse_of => :mail_account
   has_many :mailbox_folders, :dependent => :destroy
-  has_one :sync_job
+  has_many :sync_jobs
 
   has_settings do |setting|
     setting.key :sync_options, defaults: {
@@ -20,6 +20,10 @@ class MailAccount < ApplicationRecord
       exclude_folders: 'INBOX.Junk,INBOX.Spam',
       archive_folder_name: 'INBOX.mailslave_archive'
     }
+  end
+
+  def sync_job
+    sync_jobs.last
   end
 
   def pull_imap

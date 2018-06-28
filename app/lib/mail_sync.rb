@@ -29,15 +29,19 @@ class MailSync
       rescue StandardError => e
         Rails.logger.error "Sync of #{folder} failed.\n #{e.message}"
         @sync_info += "Sync of #{folder} failed.\n #{e.message} \n"
+      #  raise e
       end
     end
-    Rails.logger.info "Sync job complete:
+    msg = "Sync job complete:
                         #{@cnt_mails_processed} mails processed |
                         #{@cnt_mails_skipped} mails skipped |
                         #{@cnt_mails_new} new mails |
                         #{@cnt_mails_archived} mails archived !"
+    Rails.logger.info msg
+    @sync_info += msg
+
     end_time = Time.now
-    sync_job = account.build_sync_job({
+    sync_job = account.sync_jobs.create({
                                           sync_start:start_time,
                                           sync_end: end_time,
                                           processed_entries: @cnt_mails_processed,
@@ -46,99 +50,27 @@ class MailSync
                                           archived_entries: @cnt_mails_archived,
                                           info: @sync_info
                                       })
+
     account.save!
   end
 
   def import_folder(folder,folder_id,search_query)
+    errors = {}
+    max_errors = 5
+
     imap.select(folder)
     archive_folder_name = account.settings(:sync_options).archive_folder_name
     imap.create(archive_folder_name) if imap.list('',archive_folder_name).nil?
     imap.search(search_query).each do |message_id|
-      Rails.logger.debug message:"Processing #{message_id}",mailbox:folder
-      @cnt_mails_processed += 1
-
-      # fetch all the email contents
+      raise errors.inspect if errors.length >= max_errors
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
-      # instantiate a UserMail object to avoid further IMAP parameters nightmares
-      mail_obj = Mail.read_from_string msg
-      contents = parse_body(mail_obj)
-      plain_text = contents['text/plain'].try(:truncate,2621000)
-      html_text = contents['text/html'].try(:truncate,2621000)
-
-      #plain_text = body_in_utf8(mail_obj,'text/plain').truncate(20000)
-      #html_text = body_in_utf8(mail_obj,'text/html').truncate(20000)
-      m_subject = mail_obj.subject
-      m_from = mail_obj.from
-      m_to = mail_obj.to
-      m_cc = mail_obj.cc
-      m_bcc = mail_obj.bcc
-      m_replyto = mail_obj.reply_to
-      m_receive_date = mail_obj.date
-      m_id = mail_obj.message_id
-      m_in_reply_to = mail_obj.in_reply_to
-
-      due_date = m_receive_date + account.settings(:sync_options).delete_after.days
-      archive = Date.today > due_date
-
-      attrs = {subject: m_subject,
-               from: m_from,
-               to: m_to,
-               receive_date: m_receive_date,
-               plain_content: plain_text,
-               html_content: html_text,
-               message_id: m_id,
-               mailbox_id: message_id,
-               cc: m_cc,
-               bcc: m_bcc,
-               replyto: m_replyto,
-               in_reply_to: m_in_reply_to,
-               conversation: mail_obj.references,
-               folder_id: folder_id,
-               archived: archive}
-
-      m_desc = "#{message_id} / #{m_subject.truncate(25)}"
-      # TODO: if exist, compare checksums
-      if UserMail.exists?(:message_id => m_id)
-        Rails.logger.info "Existing mail #{m_id} skipped"
-        @cnt_mails_skipped += 1
-        @sync_info += "#{folder}:#{m_desc} - existing entry \n"
-        mail = UserMail.where(message_id: m_id).first
-      else
-        mail = account.user_mails.new(attrs)
-        if mail.save
-          @cnt_mails_new += 1
-          @sync_info += "#{folder}:#{m_desc} - new entry \n"
-          m_file = CarrierFile.new(mail_obj.to_s)
-          m_file.original_filename = "mail_source_#{mail.id}.eml"
-          m_file.content_type = mail_obj.mime_type
-          mail.source_file = m_file
-          mail.checksum = Digest::SHA2.hexdigest(mail_obj.to_s)
-          mail.save!
-
-          mail_obj.attachments.each do |att|
-            document = CarrierFile.new(att.decoded)
-            document.original_filename = att.filename
-            document.content_type = att.mime_type
-            mail.user_mail_attachments.create(file: document )
-          end
-        else
-          Rails.logger.error(mail.errors.full_messages + mail.inspect)
-          raise mail.errors.full_messages
-        end
-      end
-
-
-      #Rails.logger.info("Mail #{mail.id}: received:#{mail.receive_date} due:#{due_date}")
-      if archive
-        if mail.archived?
-          Rails.logger.warn("Mail #{mail.id} was archived but not moved to archive")
-        end
-        Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
-        imap.copy(message_id, archive_folder_name)
-        imap.store(message_id, "+FLAGS", [:Deleted])
-        mail.update_attribute(:archived, true)
-        @cnt_mails_archived += 1
-        @sync_info += "#{folder}:#{m_desc} - archived \n"
+      begin
+        sync_mail(msg, message_id, folder, folder_id)
+      rescue StandardError => e
+        errors[message_id] = "#{e} #{e.backtrace.first}\n"
+        Rails.logger.error "#{e} #{e.backtrace}\n"
+        @sync_info += "[#{folder}/#{message_id}] #{e} #{e.backtrace.first}\n"
+      #  raise e
       end
       break if @cnt_mails_archived >= entry_limit
     end
@@ -177,6 +109,90 @@ class MailSync
 
   def check_encoding(encoding_str)
     Encoding.name_list.any?{ |encoding| encoding.casecmp(encoding_str).zero? }
+  end
+
+  private
+  def mail_from_string(message_id, folder_id, mail_obj)
+    contents = parse_body(mail_obj)
+    plain_text = contents['text/plain'].try(:truncate, 2621000)
+    html_text = contents['text/html'].try(:truncate, 2621000)
+
+    attrs = {subject: mail_obj.subject,
+             from: mail_obj.from,
+             to: mail_obj.to,
+             receive_date: mail_obj.date,
+             plain_content: plain_text,
+             html_content: html_text,
+             message_id: mail_obj.message_id,
+             mailbox_id: message_id,
+             cc: mail_obj.cc,
+             bcc: mail_obj.bcc,
+             replyto: mail_obj.reply_to,
+             in_reply_to: mail_obj.in_reply_to,
+             conversation: mail_obj.references,
+             folder_id: folder_id,
+             archived: false}
+    return UserMail.new(attrs)
+  end
+
+  def store_source_file(mail_obj, mail)
+    m_file = CarrierFile.new(mail_obj.to_s)
+    m_file.original_filename = mail.get_filename
+    m_file.content_type = mail_obj.mime_type
+    mail.source_file = m_file
+    mail.checksum = Digest::SHA2.hexdigest(mail_obj.to_s)
+    mail.save!
+  end
+
+  def store_attachment_files(mail_obj, mail)
+    mail_obj.attachments.each do |att|
+      document = CarrierFile.new(att.decoded)
+      document.original_filename = att.filename
+      document.content_type = att.mime_type
+      mail.user_mail_attachments.create(file: document )
+    end
+  end
+
+  def sync_mail(msg,message_id, folder_name, folder_id)
+    Rails.logger.debug message:"Processing #{message_id}",mailbox:folder_name
+    @cnt_mails_processed += 1
+
+    mail_obj = Mail.read_from_string msg
+    uid = mail_obj.message_id
+
+    # TODO: if exist, compare checksums
+    if UserMail.exists?(:message_id => uid)
+      mail = UserMail.where(message_id: uid).first
+      Rails.logger.info "Existing mail #{uid} skipped"
+      @cnt_mails_skipped += 1
+      @sync_info += "#{folder_name} - #{mail.get_filename} - existing entry \n"
+    else
+      mail =  mail_from_string(message_id, folder_id, mail_obj)
+      mail.mail_account_id = account.id
+      #account.user_mails << mail
+      #TODO: extract file generation
+      mail.save!
+        @cnt_mails_new += 1
+        @sync_info += "#{folder_name} - #{mail.get_filename} - new entry \n"
+
+        store_source_file(mail_obj,mail)
+        store_attachment_files(mail_obj,mail)
+      #else
+      #  Rails.logger.error(mail.errors.full_messages + mail.inspect)
+      #  raise mail.errors.full_messages
+      #end
+    end
+
+    due_date = mail_obj.date + account.settings(:sync_options).delete_after.days
+    archive = Date.today > due_date
+    if archive
+      Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
+      imap.copy(message_id, archive_folder_name)
+      imap.store(message_id, "+FLAGS", [:Deleted])
+      mail.update_attribute(:archived, true)
+      @cnt_mails_archived += 1
+      @sync_info += "#{folder_name} - #{mail.get_filename} - archived \n"
+    end
   end
 
 end
