@@ -159,6 +159,7 @@ class MailSync
 
     mail_obj = Mail.read_from_string msg
     uid = mail_obj.message_id
+    archive_folder_name = account.settings(:sync_options).archive_folder_name
 
     # TODO: if exist, compare checksums
     if UserMail.exists?(:message_id => uid)
@@ -171,16 +172,16 @@ class MailSync
       mail.mail_account_id = account.id
       #account.user_mails << mail
       #TODO: extract file generation
-      mail.save!
+      if mail.save
         @cnt_mails_new += 1
         @sync_info += "#{folder_name} - #{mail.get_filename} - new entry \n"
 
         store_source_file(mail_obj,mail)
         store_attachment_files(mail_obj,mail)
-      #else
-      #  Rails.logger.error(mail.errors.full_messages + mail.inspect)
-      #  raise mail.errors.full_messages
-      #end
+      else
+        Rails.logger.error(mail.errors.full_messages + mail.inspect)
+        raise mail.errors.full_messages
+      end
     end
 
     due_date = mail_obj.date + account.settings(:sync_options).delete_after.days
@@ -188,11 +189,25 @@ class MailSync
     if archive
       Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
       imap.copy(message_id, archive_folder_name)
+      #send_to_archive(mail_obj)
       imap.store(message_id, "+FLAGS", [:Deleted])
       mail.update_attribute(:archived, true)
       @cnt_mails_archived += 1
       @sync_info += "#{folder_name} - #{mail.get_filename} - archived \n"
     end
   end
+
+  #TODO:parameter for archive mailbox
+  def send_to_archive(mail_obj)
+    account = self.account
+    mail = Mail.new do
+      to      'mailslave-archive@kaiser-tappe.de'
+      from    'technik@kaiser-tappe.de'#account.email
+      subject "[ARCHIVED]#{mail_obj.subject}"
+    end
+    mail.attachments["mail.eml"] = mail_obj.to_s
+    mail.deliver!
+  end
+
 
 end
