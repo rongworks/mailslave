@@ -12,10 +12,10 @@ class MailAccount < ApplicationRecord
 
   has_settings do |setting|
     setting.key :sync_options, defaults: {
-      interval: 15.minutes, # interval for retrieving TODO: implement
+      interval: 15, # interval for retrieving TODO: implement
       entry_limit: 25, # process amount of entries, then wait for next sync
       only_seen: true, # only seen messages get archived
-      only_older_than: 0, # only archive messages older than X days
+      only_older_than: 30, # only archive messages older than X days
       delete_after: 0, # delete messages that are older than x days
       exclude_folders: 'INBOX.Junk,INBOX.Spam',
       archive_folder_name: 'INBOX.mailslave_archive'
@@ -38,7 +38,7 @@ class MailAccount < ApplicationRecord
     mail_sync.disconnect
     interval = settings(:sync_options).interval
 
-    delay(queue: 'sync', run_at: Proc.new { interval.from_now }).pull_imap
+    delay(queue: 'sync', run_at: Proc.new { interval.minutes.from_now }).pull_imap
   end
 
   def find_or_create_folder(folder)
