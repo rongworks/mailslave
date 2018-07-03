@@ -12,6 +12,10 @@ class MailSync
   end
 
   def sync(folder_excludes, search_query)
+    account = self.account
+    Mail.defaults do
+      delivery_method :smtp, address: account.smtp_server, port: account.smtp_port
+    end
 
     start_time = Time.now
     @cnt_mails_new = 0
@@ -185,11 +189,11 @@ class MailSync
     end
 
     due_date = mail_obj.date + account.settings(:sync_options).delete_after.days
-    archive = Date.today > due_date
+    archive = true #Date.today > due_date
     if archive
       Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
-      imap.copy(message_id, archive_folder_name)
-      #send_to_archive(mail_obj)
+      #imap.copy(message_id, archive_folder_name)
+      send_to_archive(mail_obj)
       imap.store(message_id, "+FLAGS", [:Deleted])
       mail.update_attribute(:archived, true)
       @cnt_mails_archived += 1
@@ -200,13 +204,12 @@ class MailSync
   #TODO:parameter for archive mailbox
   def send_to_archive(mail_obj)
     account = self.account
-    mail = Mail.new do
-      to      'mailslave-archive@kaiser-tappe.de'
-      from    'technik@kaiser-tappe.de'#account.email
-      subject "[ARCHIVED]#{mail_obj.subject}"
-    end
-    mail.attachments["mail.eml"] = mail_obj.to_s
-    mail.deliver!
+    to = 'mailslave-archive@kaiser-tappe.de'
+
+    msg = ArchiveMailer.send_to_archive_mail(from:account.email,to:to,subject:mail_obj.subject,attachment:mail_obj.to_s)
+    msg.delivery_method.settings.merge!({address: account.smtp_server,port:account.smtp_port,user_name:account.login,password:account.password})
+    msg.deliver_now!
+
   end
 
 

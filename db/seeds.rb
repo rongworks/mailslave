@@ -11,5 +11,5 @@
 if User.all.count <= 0
   u1 = User.create!(name:'admin',email:'admin@example.com',password:'password',password_confirmation:'password')
   u2 = User.create! :name => 'John Doe', :email => 'john@gmail.com', :password => 'topsecret', :password_confirmation => 'topsecret'
-  acc1 = MailAccount.create!("name"=>"Test1", "email"=>"mailarchiv-test@kaiser-tappe.de", "user_id"=>u1.id, "login"=>"mailarchiv-test@kaiser-tappe.de", "password"=>"lFKytjSWYKGaXRMNSOIu", "port"=>"993", "ssl"=>"1", "host"=>"sslin.de")
+  acc1 = MailAccount.create!("name"=>"Test1", "email"=>"mailarchiv-test@kaiser-tappe.de", "user_id"=>u1.id, "login"=>"mailarchiv-test@kaiser-tappe.de", "password"=>"lFKytjSWYKGaXRMNSOIu", "port"=>"993", "ssl"=>"1", "host"=>"sslin.de", "smtp_server"=>"sslout.de", "smtp_port"=>"465")
 end

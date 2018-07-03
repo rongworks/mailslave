@@ -80,6 +80,6 @@ class MailAccountsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def mail_account_params
-      params.require(:mail_account).permit(:name, :email, :user_id, :login, :password, :port, :ssl, :host)
+      params.require(:mail_account).permit(:name, :email, :user_id, :login, :password, :port, :ssl, :host, :smtp_server, :smtp_port)
     end
 end

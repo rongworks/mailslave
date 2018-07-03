@@ -16,7 +16,7 @@ class MailAccount < ApplicationRecord
       entry_limit: 25, # process amount of entries, then wait for next sync
       only_seen: true, # only seen messages get archived
       only_older_than: 0, # only archive messages older than X days
-      delete_after: 30, # delete messages that are older than x days
+      delete_after: 0, # delete messages that are older than x days
       exclude_folders: 'INBOX.Junk,INBOX.Spam',
       archive_folder_name: 'INBOX.mailslave_archive'
     }
