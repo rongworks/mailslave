@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180614110458) do
+ActiveRecord::Schema.define(version: 20180703064504) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -44,10 +44,12 @@ ActiveRecord::Schema.define(version: 20180614110458) do
     t.string   "port"
     t.boolean  "ssl"
     t.string   "host"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
     t.text     "login"
     t.text     "password"
+    t.string   "smtp_server"
+    t.string   "smtp_port"
     t.index ["user_id"], name: "index_mail_accounts_on_user_id"
   end
 
