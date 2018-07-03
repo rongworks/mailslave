@@ -189,7 +189,7 @@ class MailSync
     end
 
     due_date = mail_obj.date + account.settings(:sync_options).delete_after.days
-    archive = true #Date.today > due_date
+    archive = Date.today > due_date
     if archive
       Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
       #imap.copy(message_id, archive_folder_name)
