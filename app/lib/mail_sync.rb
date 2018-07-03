@@ -183,7 +183,7 @@ class MailSync
         store_source_file(mail_obj,mail)
         store_attachment_files(mail_obj,mail)
       else
-        Rails.logger.error(mail.errors.full_messages + mail.inspect)
+        Rails.logger.error("#{mail.errors.full_messages} \n #{mail.inspect}")
         raise mail.errors.full_messages
       end
     end
