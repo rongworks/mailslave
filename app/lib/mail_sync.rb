@@ -184,12 +184,18 @@ class MailSync
         store_attachment_files(mail_obj,mail)
       else
         Rails.logger.error("#{mail.errors.full_messages} \n #{mail.inspect}")
-        raise mail.errors.full_messages
+        raise mail.errors.full_messages.join(', ')
       end
     end
 
-    due_date = mail_obj.date + account.settings(:sync_options).delete_after.days
-    archive = Date.today > due_date
+    if mail_obj.date.present?
+      due_date = mail_obj.date + account.settings(:sync_options).delete_after.days
+      archive = Date.today > due_date
+    else
+      archive = true
+      Rails.logger.warn("Mail #{mail.subject}, no date set !")
+    end
+
     if archive
       Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
       #imap.copy(message_id, archive_folder_name)
