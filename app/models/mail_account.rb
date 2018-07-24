@@ -39,7 +39,7 @@ class MailAccount < ApplicationRecord
     mail_sync.disconnect
     interval = settings(:sync_options).interval
 
-    delay(queue: 'sync', run_at: Proc.new { interval.minutes.from_now }).pull_imap
+    delay(queue: 'sync', run_at: (Time.now + interval.minutes).to_datetime ).pull_imap
   end
 
   def find_or_create_folder(folder)
