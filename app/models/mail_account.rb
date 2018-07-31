@@ -24,7 +24,7 @@ class MailAccount < ApplicationRecord
 
   #TODO: clean up old sync jobs?
   def sync_job
-    sync_jobs.last
+    return sync_jobs.last unless sync_jobs.empty?
   end
 
   def pull_imap

@@ -54,17 +54,20 @@ div.row
           td = @mail_account.settings(:sync_options).exclude_folders
   div.col-md-6
     strong Last sync:
-    - job = @mail_account.sync_job
-    = "#{l job.sync_start} (p:#{job.processed_entries} n:#{job.new_entries} s:#{job.skipped_entries})" unless @mail_account.sync_job.nil?
-    br
-    button.btn.btn-primary.mb-2 data-toggle="collapse" href="#sync-info" role="button" aria-expanded="false" aria-controls="sync-info"
-      | Show
-    div#sync-info.collapse
-      = "job ##{job.id}"
-      pre
-        = job.info
-        hr
-        = "#{l job.sync_start} until #{l job.sync_end}"
+    - if @mail_account.sync_job
+      - job = @mail_account.sync_job
+      = "#{l job.sync_start} (p:#{job.processed_entries} n:#{job.new_entries} s:#{job.skipped_entries})" unless @mail_account.sync_job.nil?
+      br
+      button.btn.btn-primary.mb-2 data-toggle="collapse" href="#sync-info" role="button" aria-expanded="false" aria-controls="sync-info"
+        | Show
+      div#sync-info.collapse
+        = "job ##{job.id}"
+        pre
+          = job.info
+          hr
+          = "#{l job.sync_start} until #{l job.sync_end}"
+    - else
+      | No sync jobs
 hr
 
 div.row
