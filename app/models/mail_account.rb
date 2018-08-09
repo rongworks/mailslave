@@ -10,6 +10,10 @@ class MailAccount < ApplicationRecord
   has_many :mailbox_folders, :dependent => :destroy
   has_many :sync_jobs
 
+  after_create do
+    delay(queue: 'sync').pull_imap
+  end
+
   has_settings do |setting|
     setting.key :sync_options, defaults: {
       interval: 15, # interval for retrieving TODO: implement
