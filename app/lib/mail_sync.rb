@@ -68,12 +68,13 @@ class MailSync
     imap.search(search_query).each do |message_id|
       raise errors.inspect if errors.length >= max_errors
       msg = imap.fetch(message_id,'RFC822')[0].attr['RFC822']
+      uid = imap.fetch(message_id,'UID')[0].attr['UID']
       begin
         sync_mail(msg, message_id, folder, folder_id)
       rescue StandardError => e
         errors[message_id] = "#{e} #{e.backtrace.first}\n"
         Rails.logger.error "#{e} #{e.backtrace}\n"
-        @sync_info += "[#{folder}/#{message_id}] #{e} #{e.backtrace.first}\n"
+        @sync_info += "[#{folder}/#{uid}] #{e} #{e.backtrace.first}\n"
       #  raise e
       end
       break if @cnt_mails_archived >= entry_limit

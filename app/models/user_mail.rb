@@ -32,7 +32,7 @@ class UserMail < ApplicationRecord
   end
 
   def get_filename
-    sbj_name = subject.gsub(/[^0-9A-z.\-]/, '_').truncate(25, omission:'__')
+    sbj_name = subject.blank? ? "(No Subject)":subject.gsub(/[^0-9A-z.\-]/, '_').truncate(25, omission:'__')
     return "#{id}_#{sbj_name}.eml"
   end
 
