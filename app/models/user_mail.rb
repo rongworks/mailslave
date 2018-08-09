@@ -8,7 +8,7 @@ class UserMail < ApplicationRecord
   validates :receive_date,:message_id,:to,:from,presence: true
 
   before_save :upload_location
-  before_create :check_receiver
+  before_validation :check_receiver
 
   mount_uploader :source_file, MailSourceUploader
 
