@@ -8,6 +8,7 @@ class UserMail < ApplicationRecord
   validates :receive_date,:message_id,:to,:from,presence: true
 
   before_save :upload_location
+  before_create :check_receiver
 
   mount_uploader :source_file, MailSourceUploader
 
@@ -52,7 +53,12 @@ class UserMail < ApplicationRecord
       Rails.logger.error("File for attachment #{id} cannot be found")
       # TODO: rescan mail?
     end
+  end
 
+  def check_receiver
+    if self.to.nil?
+      self.to = mail_account.email
+    end
   end
 
 end
