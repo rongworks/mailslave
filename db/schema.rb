@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180703064504) do
+ActiveRecord::Schema.define(version: 20180814132427) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -98,13 +98,13 @@ ActiveRecord::Schema.define(version: 20180703064504) do
 
   create_table "user_mails", force: :cascade do |t|
     t.string   "from"
-    t.string   "to"
+    t.text     "to"
     t.string   "replyto"
     t.datetime "receive_date"
     t.string   "envelope_from"
     t.string   "message_id"
-    t.string   "cc"
-    t.string   "bcc"
+    t.text     "cc"
+    t.text     "bcc"
     t.string   "subject"
     t.integer  "mail_account_id"
     t.datetime "created_at",                       null: false
