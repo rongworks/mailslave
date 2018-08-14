@@ -3,7 +3,7 @@ module UserMailsHelper
       if mails.nil?
         return ""
       end
-      mail_list = JSON.parse(mails)
+      mail_list = mails.scan(/"([^"\[\],]+)"/i).flatten
       if mail_list.count > 0
         mail_list.map do |mail|
           content_tag :span do
