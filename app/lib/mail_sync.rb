@@ -159,12 +159,15 @@ class MailSync
   end
 
   def sync_mail(msg,message_id, folder_name, folder_id)
-    Rails.logger.debug message:"Processing #{message_id}",mailbox:folder_name
     @cnt_mails_processed += 1
 
     mail_obj = Mail.read_from_string msg
     uid = mail_obj.message_id
     archive_folder_name = account.settings(:sync_options).archive_folder_name
+
+    mail_id = "#{folder_name} : #{uid} : #{mail_obj.subject}"
+    Rails.logger.info message:"Processing #{mail_id}",mailbox:folder_name
+    @sync_info += "Processing #{mail_id}"
 
     # TODO: if exist, compare checksums
     if UserMail.exists?(:message_id => uid)
@@ -175,8 +178,7 @@ class MailSync
     else
       mail =  mail_from_string(message_id, folder_id, mail_obj)
       mail.mail_account_id = account.id
-      #account.user_mails << mail
-      #TODO: extract file generation
+
       if mail.save
         @cnt_mails_new += 1
         @sync_info += "#{folder_name} - #{mail.get_filename} - new entry \n"
@@ -198,7 +200,7 @@ class MailSync
     end
 
     if archive
-      Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
+      #Rails.logger.info("Deleting old mail #{mail.subject.truncate(20)} #{mail.id} received on #{mail.receive_date}, due on #{due_date}")
       #imap.copy(message_id, archive_folder_name)
       send_to_archive(mail_obj)
       imap.store(message_id, "+FLAGS", [:Deleted])
