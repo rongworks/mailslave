@@ -5,7 +5,7 @@ class UserMail < ApplicationRecord
 
   validates :message_id, uniqueness: true
   validates :plain_content,:html_content, length: {maximum: 2621000}
-  validates :receive_date,:message_id,:to,:from,presence: true
+  validates :message_id,:to,:from,presence: true
 
   before_save :upload_location
   before_validation :check_receiver
