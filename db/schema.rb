@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180814132427) do
+ActiveRecord::Schema.define(version: 20181029084306) do
 
   create_table "crono_jobs", force: :cascade do |t|
     t.string   "job_id",                               null: false
@@ -84,6 +84,9 @@ ActiveRecord::Schema.define(version: 20180814132427) do
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
     t.integer  "archived_entries"
+    t.boolean  "complete"
+    t.boolean  "success"
+    t.string   "state"
     t.index ["mail_account_id"], name: "index_sync_jobs_on_mail_account_id"
   end
 

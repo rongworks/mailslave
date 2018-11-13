@@ -4,7 +4,7 @@ namespace :sync do
   task :start => :environment do
 
     MailAccount.all.each do |account|
-      account.delay(:queue => 'sync').pull_imap
+      account.sync!
     end
 
   end

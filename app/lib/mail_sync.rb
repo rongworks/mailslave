@@ -36,6 +36,10 @@ class MailSync
       #  raise e
       end
     end
+    complete_sync(account, start_time)
+  end
+
+  def complete_sync(account, start_time)
     msg = "Sync job complete:
                         #{@cnt_mails_processed} mails processed |
                         #{@cnt_mails_skipped} mails skipped |
@@ -45,17 +49,16 @@ class MailSync
     @sync_info += msg
 
     end_time = Time.now
-    sync_job = account.sync_jobs.create({
-                                          sync_start:start_time,
-                                          sync_end: end_time,
-                                          processed_entries: @cnt_mails_processed,
-                                          new_entries: @cnt_mails_new,
-                                          skipped_entries: @cnt_mails_skipped,
-                                          archived_entries: @cnt_mails_archived,
-                                          info: @sync_info
-                                      })
+    account.sync_job.update_attributes({
+                                            sync_start: start_time,
+                                            sync_end: end_time,
+                                            processed_entries: @cnt_mails_processed,
+                                            new_entries: @cnt_mails_new,
+                                            skipped_entries: @cnt_mails_skipped,
+                                            archived_entries: @cnt_mails_archived,
+                                            info: @sync_info
+                                        })
 
-    account.save!
   end
 
   def import_folder(folder,folder_id,search_query)

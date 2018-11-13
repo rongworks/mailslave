@@ -56,7 +56,7 @@ div.row
     strong Last sync:
     - if @mail_account.sync_job
       - job = @mail_account.sync_job
-      = "#{l job.sync_start} (p:#{job.processed_entries} n:#{job.new_entries} s:#{job.skipped_entries})" unless @mail_account.sync_job.nil?
+      = "#{l job.sync_start} (p:#{job.processed_entries} n:#{job.new_entries} s:#{job.skipped_entries}) -- #{job.state}" unless @mail_account.sync_job.nil?
       br
       button.btn.btn-primary.mb-2 data-toggle="collapse" href="#sync-info" role="button" aria-expanded="false" aria-controls="sync-info"
         | Show

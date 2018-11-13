@@ -11,7 +11,7 @@ class MailAccount < ApplicationRecord
   has_many :sync_jobs
 
   after_create do
-    delay(queue: 'sync').pull_imap
+    sync!
   end
 
   has_settings do |setting|
@@ -31,6 +31,13 @@ class MailAccount < ApplicationRecord
     return sync_jobs.last unless sync_jobs.empty?
   end
 
+  def sync!(interval = -1)
+    return unless sync_job.nil? || sync_job.complete?
+    sjob = sync_jobs.create()
+    the_interval = interval == -1 ? settings(:sync_options).interval : interval
+    Delayed::Job.enqueue(PullImapJob.new(sjob.id),:run_at => (Time.now + the_interval.minutes).to_datetime )
+  end
+
   def pull_imap
     search_query = ['UNFLAGGED']
     search_query << 'SEEN' if settings(:sync_options).only_seen
@@ -41,9 +48,9 @@ class MailAccount < ApplicationRecord
     mail_sync = MailSync.new(self,settings(:sync_options).entry_limit)
     mail_sync.sync(exclude_folders, search_query)
     mail_sync.disconnect
-    interval = settings(:sync_options).interval
 
-    delay(queue: 'sync', run_at: (Time.now + interval.minutes).to_datetime ).pull_imap
+
+    #delay(queue: 'sync', run_at: (Time.now + interval.minutes).to_datetime ).pull_imap
   end
 
   def find_or_create_folder(folder)
